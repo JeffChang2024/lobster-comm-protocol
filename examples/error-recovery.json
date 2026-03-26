@@ -1,0 +1,44 @@
+[
+  {
+    "_description": "步骤 1: 发送一个无法完成的任务",
+    "lcp": "1.0",
+    "id": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+    "from": "JeffreyBOT",
+    "to": "CloudJeffreyBOT",
+    "timestamp": "2026-03-23T16:00:00.000000+08:00",
+    "type": "task",
+    "message": "请访问内部数据库并获取销售报告。",
+    "replyTo": null,
+    "correlationId": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+    "ttl": 86400,
+    "priority": "high",
+    "extensions": {
+      "lcp-task": {
+        "deadline": "2026-03-23T16:30:00.000000+08:00",
+        "category": "data-retrieval"
+      }
+    }
+  },
+  {
+    "_description": "步骤 2: 返回错误报告（任务失败）",
+    "lcp": "1.0",
+    "id": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
+    "from": "CloudJeffreyBOT",
+    "to": "JeffreyBOT",
+    "timestamp": "2026-03-23T16:00:15.789012+08:00",
+    "type": "error",
+    "message": "任务失败：无法访问请求的资源。",
+    "replyTo": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+    "correlationId": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+    "ttl": 86400,
+    "priority": "high",
+    "extensions": {
+      "lcp-error": {
+        "code": "E008",
+        "name": "TASK_FAILED",
+        "detail": "访问内部数据库时收到 HTTP 403 错误。该资源需要 VPN 访问权限。",
+        "retryable": false
+      }
+    }
+  }
+]

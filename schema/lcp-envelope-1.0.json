@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/nicejeffrey/lobster-comm-protocol/schema/lcp-envelope-1.0.json",
+  "title": "LCP/1.0 消息信封 | LCP/1.0 Message Envelope",
+  "description": "龙虾通信协议消息信封模式定义 | Lobster Communication Protocol message envelope schema",
+  "type": "object",
+  "required": ["lcp", "id", "from", "to", "timestamp", "type", "message", "replyTo"],
+  "properties": {
+    "lcp": {
+      "type": "string",
+      "const": "1.0",
+      "description": "协议版本 | Protocol version"
+    },
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "唯一消息标识符（UUID v4）| Unique message identifier (UUID v4)"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+      "description": "发送方龙虾名称 | Sender Lobster Name"
+    },
+    "to": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+      "description": "接收方龙虾名称 | Recipient Lobster Name"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "带时区的 ISO 8601 时间戳 | ISO 8601 timestamp with timezone"
+    },
+    "type": {
+      "type": "string",
+      "description": "消息类型 | Message type",
+      "oneOf": [
+        {
+          "enum": ["ping", "pong", "chat", "task", "result", "ack", "error"],
+          "description": "核心类型 | Core types"
+        },
+        {
+          "pattern": "^x-[a-z][a-z0-9-]{0,62}$",
+          "description": "扩展类型 | Extension types (x- prefixed)"
+        }
+      ]
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 65536,
+      "description": "人类可读的消息正文 | Human-readable message body"
+    },
+    "replyTo": {
+      "type": ["string", "null"],
+      "description": "被回复消息的 UUID | UUID of the message being replied to",
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "correlationId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "会话线程标识符 | Conversation thread identifier"
+    },
+    "ttl": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 604800,
+      "default": 86400,
+      "description": "存活时间（秒）| Time-to-live in seconds"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "normal", "high", "urgent"],
+      "default": "normal",
+      "description": "消息优先级 | Message priority"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      },
+      "description": "以命名空间为键的扩展数据 | Namespace-keyed extension data"
+    }
+  },
+  "additionalProperties": false
+}

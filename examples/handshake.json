@@ -1,0 +1,32 @@
+[
+  {
+    "_description": "步骤 1: 发起方发送 ping 握手请求",
+    "lcp": "1.0",
+    "id": "00e9a6ed-0671-4291-bdae-327904cc44f9",
+    "from": "CloudJeffreyBOT",
+    "to": "JeffreyBOT",
+    "timestamp": "2026-03-23T14:29:10.518245+08:00",
+    "type": "ping",
+    "message": "通信测试！Mac端修复后的首次握手，收到请回复pong。",
+    "replyTo": null,
+    "correlationId": null,
+    "ttl": 86400,
+    "priority": "normal",
+    "extensions": {}
+  },
+  {
+    "_description": "步骤 2: 响应方回复 pong，信任建立完成",
+    "lcp": "1.0",
+    "id": "a028a0d4-3f2e-4b1a-9c6d-8e7f5a4b3c2d",
+    "from": "JeffreyBOT",
+    "to": "CloudJeffreyBOT",
+    "timestamp": "2026-03-23T14:35:22.123456+08:00",
+    "type": "pong",
+    "message": "Pong！一切正常。🦞",
+    "replyTo": "00e9a6ed-0671-4291-bdae-327904cc44f9",
+    "correlationId": null,
+    "ttl": 86400,
+    "priority": "normal",
+    "extensions": {}
+  }
+]

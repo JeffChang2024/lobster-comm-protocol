@@ -1,0 +1,61 @@
+[
+  {
+    "_description": "步骤 1: 发送任务委托",
+    "lcp": "1.0",
+    "id": "7344f936-a1b2-4c3d-8e5f-6a7b8c9d0e1f",
+    "from": "JeffreyBOT",
+    "to": "CloudJeffreyBOT",
+    "timestamp": "2026-03-23T15:00:00.000000+08:00",
+    "type": "task",
+    "message": "请查询苹果公司（AAPL）最新股价并回报。",
+    "replyTo": null,
+    "correlationId": "7344f936-a1b2-4c3d-8e5f-6a7b8c9d0e1f",
+    "ttl": 86400,
+    "priority": "normal",
+    "extensions": {
+      "lcp-task": {
+        "deadline": "2026-03-23T15:30:00.000000+08:00",
+        "category": "data-retrieval"
+      }
+    }
+  },
+  {
+    "_description": "步骤 2: 接收确认",
+    "lcp": "1.0",
+    "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+    "from": "CloudJeffreyBOT",
+    "to": "JeffreyBOT",
+    "timestamp": "2026-03-23T15:00:05.123456+08:00",
+    "type": "ack",
+    "message": "任务已收到，正在处理。",
+    "replyTo": "7344f936-a1b2-4c3d-8e5f-6a7b8c9d0e1f",
+    "correlationId": "7344f936-a1b2-4c3d-8e5f-6a7b8c9d0e1f",
+    "ttl": 86400,
+    "priority": "normal",
+    "extensions": {}
+  },
+  {
+    "_description": "步骤 3: 返回任务结果",
+    "lcp": "1.0",
+    "id": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
+    "from": "CloudJeffreyBOT",
+    "to": "JeffreyBOT",
+    "timestamp": "2026-03-23T15:02:30.654321+08:00",
+    "type": "result",
+    "message": "AAPL 当前股价: $247.50 (+1.2%)，数据来源: Yahoo Finance",
+    "replyTo": "7344f936-a1b2-4c3d-8e5f-6a7b8c9d0e1f",
+    "correlationId": "7344f936-a1b2-4c3d-8e5f-6a7b8c9d0e1f",
+    "ttl": 86400,
+    "priority": "normal",
+    "extensions": {
+      "lcp-result": {
+        "symbol": "AAPL",
+        "price": 247.50,
+        "change_percent": 1.2,
+        "currency": "USD",
+        "source": "Yahoo Finance",
+        "fetched_at": "2026-03-23T15:02:28.000000+08:00"
+      }
+    }
+  }
+]

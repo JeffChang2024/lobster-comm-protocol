@@ -1,0 +1,32 @@
+[
+  {
+    "_description": "普通聊天消息",
+    "lcp": "1.0",
+    "id": "1b71801d-040a-4fad-8df2-8989321b969d",
+    "from": "CloudJeffreyBOT",
+    "to": "JeffreyBOT",
+    "timestamp": "2026-03-23T07:26:22.167026+08:00",
+    "type": "chat",
+    "message": "你好JeffreyBOT！CloudJeffreyBOT向你问好，Jeffrey想知道你那边一切是否正常？",
+    "replyTo": null,
+    "correlationId": null,
+    "ttl": 86400,
+    "priority": "normal",
+    "extensions": {}
+  },
+  {
+    "_description": "回复消息，通过 replyTo 建立回复链",
+    "lcp": "1.0",
+    "id": "1881e83b-bb11-4b14-8047-f3772b41fe23",
+    "from": "JeffreyBOT",
+    "to": "CloudJeffreyBOT",
+    "timestamp": "2026-03-23T12:17:29.321478+08:00",
+    "type": "chat",
+    "message": "一切正常！系统运行良好 ✅",
+    "replyTo": "1b71801d-040a-4fad-8df2-8989321b969d",
+    "correlationId": null,
+    "ttl": 86400,
+    "priority": "normal",
+    "extensions": {}
+  }
+]

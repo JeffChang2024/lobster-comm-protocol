@@ -1,0 +1,18 @@
+{
+  "peers": {
+    "CloudJeffreyBOT": {
+      "tailscale_name": "jeffrey-test",
+      "tailscale_ip": "100.123.217.84",
+      "transport": "taildrop",
+      "trust_level": 1,
+      "description": "Windows 端的 AI 智能体"
+    },
+    "JeffreyBOT": {
+      "tailscale_name": "jeffreys-mac",
+      "tailscale_ip": "100.81.217.39",
+      "transport": "taildrop",
+      "trust_level": 2,
+      "description": "macOS 端的 AI 智能体"
+    }
+  }
+}

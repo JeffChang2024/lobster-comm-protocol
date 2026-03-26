@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>LCP/1.0 — 龙虾通信协议规范</title>
+<style>
+@page {
+  size: A4;
+  margin: 25mm 20mm 25mm 20mm;
+}
+
+body {
+  font-family: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
+  font-size: 11pt;
+  line-height: 1.8;
+  color: #111;
+  max-width: 170mm;
+  margin: 0 auto;
+  padding: 20px 40px;
+  background: #fff;
+}
+
+/* ===== 封面 ===== */
+.title-page {
+  text-align: center;
+  page-break-after: always;
+  padding-top: 60px;
+}
+.title-page .logo {
+  font-size: 72pt;
+  margin-bottom: 16px;
+}
+.title-page h1 {
+  font-size: 26pt;
+  font-weight: bold;
+  margin: 10px 0 5px;
+  letter-spacing: 2px;
+}
+.title-page .subtitle {
+  font-size: 16pt;
+  font-weight: normal;
+  color: #444;
+  margin-bottom: 10px;
+}
+.title-page .en-title {
+  font-size: 12pt;
+  font-style: italic;
+  color: #777;
+  margin-bottom: 30px;
+}
+.title-page .doc-id {
+  font-family: "Courier New", monospace;
+  font-size: 12pt;
+  color: #666;
+  margin: 20px 0;
+  padding: 8px 20px;
+  border: 1px solid #ccc;
+  display: inline-block;
+}
+.title-page .meta-table {
+  margin: 40px auto;
+  border-collapse: collapse;
+  font-size: 10.5pt;
+  text-align: left;
+}
+.title-page .meta-table td {
+  padding: 5px 18px;
+  border: none;
+}
+.title-page .meta-table td:first-child {
+  font-weight: bold;
+  color: #555;
+  width: 100px;
+  text-align: right;
+}
+.title-page .status-badge {
+  display: inline-block;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 5px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 11pt;
+  margin-top: 10px;
+}
+.title-page .copyright {
+  margin-top: 50px;
+  font-size: 9pt;
+  color: #888;
+  line-height: 1.6;
+}
+
+/* ===== 标题 ===== */
+h1 {
+  font-size: 18pt;
+  border-bottom: 2px solid #333;
+  padding-bottom: 4px;
+  margin-top: 32px;
+}
+h2 {
+  font-size: 14pt;
+  border-bottom: 1px solid #999;
+  padding-bottom: 3px;
+  margin-top: 24px;
+}
+h3 {
+  font-size: 12pt;
+  margin-top: 18px;
+}
+h4 {
+  font-size: 11pt;
+  font-style: italic;
+  margin-top: 14px;
+}
+
+/* ===== 章节自动编号 ===== */
+body { counter-reset: h1counter; }
+h1.numbered { counter-reset: h2counter; }
+h1.numbered::before {
+  counter-increment: h1counter;
+  content: counter(h1counter) ". ";
+}
+h2.numbered { counter-reset: h3counter; }
+h2.numbered::before {
+  counter-increment: h2counter;
+  content: counter(h1counter) "." counter(h2counter) " ";
+}
+h3.numbered::before {
+  counter-increment: h3counter;
+  content: counter(h1counter) "." counter(h2counter) "." counter(h3counter) " ";
+}
+
+/* ===== 目录 ===== */
+.toc {
+  page-break-after: always;
+}
+.toc h2 { border-bottom: 2px solid #333; font-size: 16pt; }
+.toc ul {
+  list-style: none;
+  padding-left: 0;
+}
+.toc li {
+  padding: 3px 0;
+  border-bottom: 1px dotted #ccc;
+  font-size: 10.5pt;
+}
+.toc li.l2 { padding-left: 24px; }
+.toc li.l3 { padding-left: 48px; font-size: 9.5pt; }
+
+/* ===== 表格 ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+  font-size: 10pt;
+}
+th, td {
+  border: 1px solid #999;
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: #f0f0f0;
+  font-weight: bold;
+}
+tr:nth-child(even) { background: #fafafa; }
+
+/* ===== 代码 ===== */
+code {
+  font-family: "Courier New", "Menlo", monospace;
+  font-size: 9.5pt;
+  background: #f5f5f5;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+pre {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-left: 3px solid #c62828;
+  padding: 10px 14px;
+  font-family: "Courier New", monospace;
+  font-size: 9pt;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* ===== 特殊区块 ===== */
+.rfc-keyword {
+  font-weight: bold;
+  font-variant: small-caps;
+  letter-spacing: 0.5px;
+}
+.note {
+  background: #e3f2fd;
+  border-left: 4px solid #1565c0;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-size: 10pt;
+}
+.note::before {
+  content: "备注：";
+  font-weight: bold;
+  color: #1565c0;
+}
+.warning {
+  background: #fff3e0;
+  border-left: 4px solid #e65100;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-size: 10pt;
+}
+.warning::before {
+  content: "安全警告：";
+  font-weight: bold;
+  color: #e65100;
+}
+.example {
+  background: #f1f8e9;
+  border-left: 4px solid #558b2f;
+  padding: 10px 14px;
+  margin: 12px 0;
+}
+.example::before {
+  content: "示例：";
+  font-weight: bold;
+  color: #558b2f;
+  font-size: 10pt;
+}
+
+/* ===== 图表 ===== */
+.figure {
+  text-align: center;
+  margin: 16px 0;
+}
+.figure pre {
+  display: inline-block;
+  text-align: left;
+  border-left-color: #555;
+}
+.figure-caption {
+  font-size: 10pt;
+  font-style: italic;
+  color: #555;
+  margin-top: 4px;
+}
+
+/* ===== ABNF ===== */
+.abnf pre {
+  border-left-color: #6a1b9a;
+  background: #faf5ff;
+}
+
+/* ===== 参考文献 ===== */
+.references td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 100px;
+}
+
+/* ===== 分页 ===== */
+.page-break { page-break-before: always; }
+
+/* ===== 摘要 ===== */
+.abstract {
+  border: 1px solid #999;
+  padding: 16px 20px;
+  margin: 20px 0;
+  background: #fcfcfc;
+}
+.abstract h3 { margin-top: 0; }
+
+/* ===== 附录 ===== */
+.appendix h1::before { content: "附录 " !important; counter-increment: none !important; }
+
+/* ===== 页脚 ===== */
+.doc-footer {
+  margin-top: 40px;
+  padding-top: 10px;
+  border-top: 1px solid #ccc;
+  font-size: 9pt;
+  color: #888;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- 封面 -->
+<!-- ============================================================ -->
+<div class="title-page">
+  <div class="logo">🦞</div>
+  <h1>龙虾通信协议</h1>
+  <div class="subtitle">LCP/1.0 — 技术规范</div>
+  <div class="en-title">Lobster Communication Protocol Specification</div>
+  <div class="doc-id">LCP-SPEC-2026-0001</div>
+  <br>
+  <div class="status-badge">建议标准（Proposed Standard）</div>
+
+  <table class="meta-table">
+    <tr><td>文档名称：</td><td>龙虾通信协议 LCP/1.0 技术规范</td></tr>
+    <tr><td>版本号：</td><td>1.0.0</td></tr>
+    <tr><td>发布日期：</td><td>2026年3月26日</td></tr>
+    <tr><td>起草者：</td><td>JeffreyBOT（OpenClaw 智能体）</td></tr>
+    <tr><td>顾问：</td><td>张捷 Jeffrey</td></tr>
+    <tr><td>文档类别：</td><td>标准化轨道（Standards Track）</td></tr>
+    <tr><td>文档状态：</td><td>建议标准</td></tr>
+    <tr><td>许可协议：</td><td>CC BY 4.0 国际</td></tr>
+  </table>
+
+  <div class="copyright">
+    版权所有 &copy; 2026 龙虾通信工作组（Lobster Communication Working Group）<br>
+    本文档依据知识共享署名 4.0 国际许可协议发布。
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 摘要与文档状态 -->
+<!-- ============================================================ -->
+<div class="abstract">
+  <h3>摘要</h3>
+  <p>
+    本文档定义了<strong>龙虾通信协议（Lobster Communication Protocol, LCP）</strong>1.0 版本——一种面向自治 AI 智能体（"龙虾"）的点对点可信消息通信协议。LCP 规定了消息信封格式、消息类型与语义、传输层绑定、身份模型、信任建立机制、生命周期管理、错误处理以及安全考量。
+  </p>
+  <p>
+    LCP 在设计上是<strong>传输层无关</strong>的。本规范定义了一种规范性传输绑定（基于 WireGuard 的 Tailscale Taildrop），并提供了面向未来绑定的扩展框架。本协议旨在保持<strong>极简、可审计、易实现</strong>——任何具备 JSON 序列化能力和文件传输机制的编程语言均可实现。
+  </p>
+</div>
+
+<div class="abstract">
+  <h3>文档状态</h3>
+  <p>
+    本文档为<em>建议标准</em>。它代表了龙虾通信工作组的共识，并已通过社区审阅。鼓励各方实现并欢迎反馈。本文档可能在未来版本中被更新、替代或废弃。
+  </p>
+  <p>
+    本文档中的关键词"<span class="rfc-keyword">必须（MUST）</span>"、"<span class="rfc-keyword">禁止（MUST NOT）</span>"、
+    "<span class="rfc-keyword">要求（REQUIRED）</span>"、"<span class="rfc-keyword">应当（SHALL）</span>"、
+    "<span class="rfc-keyword">不应（SHALL NOT）</span>"、"<span class="rfc-keyword">建议（SHOULD）</span>"、
+    "<span class="rfc-keyword">不建议（SHOULD NOT）</span>"、"<span class="rfc-keyword">推荐（RECOMMENDED）</span>"、
+    "<span class="rfc-keyword">可选（MAY）</span>"和"<span class="rfc-keyword">可选的（OPTIONAL）</span>"按照
+    <a href="#ref-rfc2119">RFC 2119</a> 和 <a href="#ref-rfc8174">RFC 8174</a> 中的定义进行解释。
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 目录 -->
+<!-- ============================================================ -->
+<div class="toc">
+  <h2>目 录</h2>
+  <ul>
+    <li>1. 引言</li>
+    <li class="l2">1.1 动机</li>
+    <li class="l2">1.2 设计目标</li>
+    <li class="l2">1.3 适用范围</li>
+    <li class="l2">1.4 术语定义</li>
+    <li>2. 协议概述</li>
+    <li class="l2">2.1 体系结构</li>
+    <li class="l2">2.2 通信模型</li>
+    <li class="l2">2.3 协议栈</li>
+    <li>3. 身份模型</li>
+    <li class="l2">3.1 智能体标识符</li>
+    <li class="l2">3.2 对等节点发现</li>
+    <li class="l2">3.3 信任建立</li>
+    <li>4. 消息信封</li>
+    <li class="l2">4.1 信封模式</li>
+    <li class="l2">4.2 字段定义</li>
+    <li class="l2">4.3 ABNF 语法</li>
+    <li class="l2">4.4 大小约束</li>
+    <li>5. 消息类型</li>
+    <li class="l2">5.1 握手消息（ping / pong）</li>
+    <li class="l2">5.2 聊天消息（chat）</li>
+    <li class="l2">5.3 任务委托（task）</li>
+    <li class="l2">5.4 任务结果（result）</li>
+    <li class="l2">5.5 接收确认（ack）</li>
+    <li class="l2">5.6 错误报告（error）</li>
+    <li class="l2">5.7 扩展类型</li>
+    <li>6. 会话线程</li>
+    <li class="l2">6.1 回复链</li>
+    <li class="l2">6.2 关联标识符</li>
+    <li class="l2">6.3 任务-结果绑定</li>
+    <li>7. 传输层</li>
+    <li class="l2">7.1 传输层要求</li>
+    <li class="l2">7.2 Taildrop 绑定（规范性）</li>
+    <li class="l2">7.3 HTTP 同步绑定（参考性）</li>
+    <li class="l2">7.4 传输协商</li>
+    <li>8. 生命周期与状态机</li>
+    <li class="l2">8.1 连接状态</li>
+    <li class="l2">8.2 消息处理流水线</li>
+    <li class="l2">8.3 收件箱/发件箱模型</li>
+    <li class="l2">8.4 归档</li>
+    <li>9. 可靠性与交付保证</li>
+    <li class="l2">9.1 至少一次交付</li>
+    <li class="l2">9.2 幂等性</li>
+    <li class="l2">9.3 消息排序</li>
+    <li class="l2">9.4 重试语义</li>
+    <li>10. 错误处理</li>
+    <li class="l2">10.1 错误码</li>
+    <li class="l2">10.2 错误消息格式</li>
+    <li class="l2">10.3 恢复流程</li>
+    <li>11. 安全考量</li>
+    <li class="l2">11.1 传输层安全</li>
+    <li class="l2">11.2 身份验证</li>
+    <li class="l2">11.3 消息完整性</li>
+    <li class="l2">11.4 机密性</li>
+    <li class="l2">11.5 重放保护</li>
+    <li class="l2">11.6 拒绝服务防护</li>
+    <li class="l2">11.7 隐私保护</li>
+    <li>12. 编码与互操作性</li>
+    <li class="l2">12.1 字符编码</li>
+    <li class="l2">12.2 时间戳格式</li>
+    <li class="l2">12.3 UUID 格式</li>
+    <li class="l2">12.4 跨平台考量</li>
+    <li>13. 可扩展性</li>
+    <li class="l2">13.1 扩展字段</li>
+    <li class="l2">13.2 自定义消息类型</li>
+    <li class="l2">13.3 版本协商</li>
+    <li>14. 注册管理</li>
+    <li>15. 参考文献</li>
+    <li class="l2">15.1 规范性参考文献</li>
+    <li class="l2">15.2 参考性参考文献</li>
+    <li>附录 A：完整 JSON Schema</li>
+    <li>附录 B：参考实现</li>
+    <li>附录 C：典型消息流示例</li>
+    <li>附录 D：变更日志</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- 1. 引言 -->
+<!-- ============================================================ -->
+<h1 class="numbered">引言</h1>
+
+<h2 class="numbered">动机</h2>
+<p>
+  随着自治 AI 智能体在个人计算环境中日益普及，一个关键的空白已经显现：缺乏一种专门为<strong>智能体对智能体</strong>消息通信设计的标准化点对点协议。现有的协议（HTTP、XMPP、MQTT）面向的是人与人、人与机器或机器与机器的场景，其信任模型、身份语义和交互模式与智能体间通信的需求存在根本差异。
+</p>
+<p>
+  <strong>龙虾通信协议（LCP）</strong>正是为填补这一空白而设计。它为代表人类委托人运行的 AI 智能体（"龙虾"）提供了一种极简、安全、可审计的消息通信标准，使其能够跨机器、跨网络边界进行可靠协调。
+</p>
+<p>
+  "龙虾"既是项目代号，也是一个隐喻：龙虾拥有坚硬的外壳（安全边界），同时通过精确而明确的信号通道进行通信。正如海洋中的龙虾各自维护着领地（宿主机器），同时在彼此之间建立可靠的通信链路。
+</p>
+
+<h2 class="numbered">设计目标</h2>
+<p>LCP 基于以下核心原则设计：</p>
+<ol>
+  <li><strong>极简性</strong> — 协议在任何主流编程语言中均可在 200 行以内实现。</li>
+  <li><strong>可审计性</strong> — 所有消息以人类可读的 JSON 文件存储，留有完整审计轨迹。</li>
+  <li><strong>默认安全</strong> — 传输层加密是强制性的；消息永远不经过未加密的通道传输。</li>
+  <li><strong>传输无关</strong> — 消息格式独立于底层投递机制。</li>
+  <li><strong>离线容忍</strong> — 协议能够优雅地处理对端临时不可达的情况。</li>
+  <li><strong>零基础设施</strong> — 不依赖中心服务器、消息代理或云服务。</li>
+  <li><strong>人类监督</strong> — 所有消息均可被人类委托人记录和审计。</li>
+</ol>
+
+<h2 class="numbered">适用范围</h2>
+<p>本规范定义了：</p>
+<ul>
+  <li>LCP 消息信封格式与序列化方式</li>
+  <li>核心消息类型及其语义</li>
+  <li>身份模型与信任建立机制</li>
+  <li>Tailscale Taildrop 传输绑定</li>
+  <li>生命周期管理与状态机</li>
+  <li>错误处理与可靠性保证</li>
+  <li>安全模型与威胁缓解</li>
+  <li>可扩展性框架</li>
+</ul>
+<p>本规范<em>不</em>定义：</p>
+<ul>
+  <li>LCP 智能体的内部架构</li>
+  <li>超出消息投递范围的应用层语义</li>
+  <li>多方（群组）通信（延至 LCP/2.0）</li>
+  <li>二进制载荷编码（延至未来扩展）</li>
+</ul>
+
+<h2 class="numbered">术语定义</h2>
+<table>
+  <tr><th>术语</th><th>定义</th></tr>
+  <tr><td>龙虾（Lobster）</td><td>实现了 LCP 协议的自治 AI 智能体。</td></tr>
+  <tr><td>对端（Peer）</td><td>与本地龙虾进行通信的远程龙虾。</td></tr>
+  <tr><td>委托人（Principal）</td><td>授权并监督龙虾运行的人类所有者/运营者。</td></tr>
+  <tr><td>信封（Envelope）</td><td>包装每条 LCP 消息的 JSON 对象。</td></tr>
+  <tr><td>尾网（Tailnet）</td><td>由 Tailscale 管理的 WireGuard 网状网络，连接已授权的设备。</td></tr>
+  <tr><td>尾投（Taildrop）</td><td>Tailscale 的点对点文件传输机制。</td></tr>
+  <tr><td>收件箱（Inbox）</td><td>接收传入消息的本地目录。</td></tr>
+  <tr><td>发件箱（Outbox）</td><td>存储已发送消息副本的本地目录。</td></tr>
+  <tr><td>信道（Channel）</td><td>两只龙虾之间的逻辑通信路径。</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 2. 协议概述 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">协议概述</h1>
+
+<h2 class="numbered">体系结构</h2>
+<p>
+  LCP 采用<strong>去中心化的点对点</strong>体系结构。每只龙虾独立运行于一台宿主机上，无需中间服务器即可与对端直接通信。整体架构由三层组成：
+</p>
+
+<div class="figure">
+<pre>
+┌─────────────────────────────────────────────────────────────┐
+│                       应 用 层                               │
+│  ┌─────────────┐                        ┌─────────────┐    │
+│  │   龙虾 A     │                        │   龙虾 B     │    │
+│  │  （智能体）   │                        │  （智能体）   │    │
+│  └──────┬───────┘                        └───────┬──────┘    │
+│         │                                        │           │
+├─────────┼────────────────────────────────────────┼───────────┤
+│         │         协 议 层（LCP/1.0）             │           │
+│  ┌──────┴───────┐                        ┌───────┴──────┐    │
+│  │   信封处理器  │  ─── JSON 消息 ──────▶ │   信封处理器  │    │
+│  │              │  ◀── JSON 消息 ──────  │              │    │
+│  └──────┬───────┘                        └───────┬──────┘    │
+│         │                                        │           │
+├─────────┼────────────────────────────────────────┼───────────┤
+│         │              传 输 层                   │           │
+│  ┌──────┴───────┐                        ┌───────┴──────┐    │
+│  │  Taildrop /  │  ═══ 加密隧道 ═══════▶ │  Taildrop /  │    │
+│  │  HTTP 同步   │  ◀═══════════════════  │  HTTP 同步   │    │
+│  └──────────────┘                        └──────────────┘    │
+│              ▲          WireGuard             ▲               │
+│              └───────────────────────────────┘               │
+│                     Tailscale 尾网                           │
+└─────────────────────────────────────────────────────────────┘
+</pre>
+<div class="figure-caption">图 1：LCP 三层体系结构</div>
+</div>
+
+<h2 class="numbered">通信模型</h2>
+<p>
+  LCP 采用<strong>异步存储转发</strong>通信模型：
+</p>
+<ol>
+  <li>发送方构造 LCP 信封，将其序列化为 JSON，并写入临时文件。</li>
+  <li>传输层将文件投递至接收方的收件箱目录。</li>
+  <li>接收方周期性轮询收件箱（或接收推送通知），处理新消息。</li>
+  <li>已处理的消息被移动至归档目录以供审计。</li>
+</ol>
+<p>
+  此模型天然具备对瞬态网络故障的韧性：如果对端离线，传输层将消息排队，待对端上线后投递。
+</p>
+
+<h2 class="numbered">协议栈</h2>
+<table>
+  <tr><th>层级</th><th>组件</th><th>职责</th></tr>
+  <tr><td>4 - 应用层</td><td>智能体逻辑</td><td>解释消息语义，生成响应</td></tr>
+  <tr><td>3 - 协议层</td><td>LCP/1.0</td><td>信封格式、消息类型、线程、生命周期</td></tr>
+  <tr><td>2 - 传输层</td><td>Taildrop / HTTP 同步</td><td>在对端之间可靠投递文件</td></tr>
+  <tr><td>1 - 网络层</td><td>WireGuard / Tailscale</td><td>加密隧道、对端认证、NAT 穿透</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 3. 身份模型 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">身份模型</h1>
+
+<h2 class="numbered">智能体标识符</h2>
+<p>
+  每只龙虾由一个<strong>龙虾名称（LName）</strong>标识，这是一个人类可读的字符串，在信任域内唯一标识该智能体。LName 遵循以下规则：
+</p>
+<ul>
+  <li><span class="rfc-keyword">必须</span>为 1 至 64 个 UTF-8 字符。</li>
+  <li><span class="rfc-keyword">必须</span>匹配正则表达式：<code>^[A-Za-z][A-Za-z0-9_-]{0,63}$</code></li>
+  <li><span class="rfc-keyword">必须</span>在信任域（尾网）内唯一。</li>
+  <li><span class="rfc-keyword">建议</span>具有描述性，能反映智能体的角色或宿主。</li>
+</ul>
+
+<div class="example">
+  合法的 LName：<code>JeffreyBOT</code>、<code>CloudJeffreyBOT</code>、<code>HomeAssistant-Agent</code>、<code>WorkPC_Bot</code>
+</div>
+
+<p>
+  对于跨信任域寻址，使用<strong>完全限定龙虾名称（FQLN）</strong>：
+</p>
+<pre><code>FQLN = LName "@" TailnetDomain
+示例：JeffreyBOT@tailnet-abcdef.ts.net</code></pre>
+
+<h2 class="numbered">对等节点发现</h2>
+<p>
+  在 LCP/1.0 中，对等节点发现采用<strong>静态预配置</strong>方式。每只龙虾维护一份<strong>对端注册表</strong>，将 LName 映射到传输地址：
+</p>
+<pre><code>{
+  "peers": {
+    "CloudJeffreyBOT": {
+      "tailscale_name": "jeffrey-test",
+      "tailscale_ip": "100.123.217.84",
+      "transport": "taildrop",
+      "status": "trusted"
+    }
+  }
+}</code></pre>
+
+<div class="note">
+  LCP/2.0 可能定义基于 Tailscale 对端列表 API 或 mDNS 公告的动态发现机制。LCP/1.0 的实现应为未来支持动态发现做好准备。
+</div>
+
+<h2 class="numbered">信任建立</h2>
+<p>
+  LCP 采用<strong>三级信任模型</strong>：
+</p>
+<table>
+  <tr><th>信任等级</th><th>名称</th><th>说明</th><th>允许的操作</th></tr>
+  <tr>
+    <td>0</td><td>未知（Unknown）</td>
+    <td>对端不在注册表中</td>
+    <td>消息静默丢弃</td>
+  </tr>
+  <tr>
+    <td>1</td><td>已识别（Recognized）</td>
+    <td>对端在注册表中，但尚未验证</td>
+    <td>仅允许 <code>ping</code> / <code>pong</code></td>
+  </tr>
+  <tr>
+    <td>2</td><td>可信（Trusted）</td>
+    <td>已成功完成 ping/pong 握手</td>
+    <td>允许所有消息类型</td>
+  </tr>
+</table>
+
+<p>信任建立遵循以下时序：</p>
+
+<div class="figure">
+<pre>
+  龙虾 A                                              龙虾 B
+     │                                                  │
+     │  1. 委托人在 A 的注册表中配置 B                    │
+     │  2. 委托人在 B 的注册表中配置 A                    │
+     │                                                  │
+     ├──── ping {id: "α", from: "A", to: "B"} ────────▶│
+     │                                                  │
+     │◀─── pong {id: "β", replyTo: "α"} ──────────────┤
+     │                                                  │
+     │  信任建立完成：A→B = 可信，B→A = 可信              │
+     │                                                  │
+     ├──── chat / task / result ───────────────────────▶│
+     │◀─── chat / task / result ───────────────────────┤
+</pre>
+<div class="figure-caption">图 2：信任建立握手流程</div>
+</div>
+
+<p><strong>信任规则：</strong></p>
+<ul>
+  <li>龙虾<span class="rfc-keyword">禁止</span>处理来自信任等级 0 或 1 的对端发送的 <code>chat</code>、<code>task</code> 或 <code>result</code> 消息。</li>
+  <li>龙虾<span class="rfc-keyword">必须</span>对来自信任等级 1 的对端的 <code>ping</code> 回复 <code>pong</code>。</li>
+  <li>龙虾<span class="rfc-keyword">可选</span>在可配置的不活跃超时后（默认：72 小时）将对端降级为信任等级 1。</li>
+  <li>委托人<span class="rfc-keyword">可选</span>随时通过将对端从注册表中移除来撤销信任。</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 4. 消息信封 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">消息信封</h1>
+
+<h2 class="numbered">信封模式</h2>
+<p>
+  每条 LCP 消息都封装在一个 JSON 信封中。信封是通信的原子单位——它<span class="rfc-keyword">必须</span>是一个以 UTF-8 编码文件序列化的单个合法 JSON 对象。
+</p>
+
+<pre><code>{
+  "lcp": "1.0",
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "from": "JeffreyBOT",
+  "to": "CloudJeffreyBOT",
+  "timestamp": "2026-03-26T13:56:00.000+08:00",
+  "type": "chat",
+  "message": "来自海底的问候！🦞",
+  "replyTo": null,
+  "correlationId": null,
+  "ttl": 86400,
+  "priority": "normal",
+  "extensions": {}
+}</code></pre>
+
+<h2 class="numbered">字段定义</h2>
+<table>
+  <tr><th>字段</th><th>类型</th><th>必选</th><th>说明</th></tr>
+  <tr>
+    <td><code>lcp</code></td><td>string</td><td>必须</td>
+    <td>协议版本号。本规范中必须为 <code>"1.0"</code>。</td>
+  </tr>
+  <tr>
+    <td><code>id</code></td><td>string</td><td>必须</td>
+    <td>全局唯一消息标识符。必须为符合 <a href="#ref-rfc9562">RFC 9562</a> 的 UUID v4。</td>
+  </tr>
+  <tr>
+    <td><code>from</code></td><td>string</td><td>必须</td>
+    <td>发送方龙虾的 LName。必须与发送方的注册身份一致。</td>
+  </tr>
+  <tr>
+    <td><code>to</code></td><td>string</td><td>必须</td>
+    <td>目标接收方龙虾的 LName。必须与已知对端匹配。</td>
+  </tr>
+  <tr>
+    <td><code>timestamp</code></td><td>string</td><td>必须</td>
+    <td>带时区偏移的 ISO 8601 时间戳。必须包含亚秒精度。</td>
+  </tr>
+  <tr>
+    <td><code>type</code></td><td>string</td><td>必须</td>
+    <td>消息类型。必须为已注册类型之一（见第 5 章）。</td>
+  </tr>
+  <tr>
+    <td><code>message</code></td><td>string</td><td>必须</td>
+    <td>人类可读的消息正文。可包含 UTF-8 文本（含表情符号）。</td>
+  </tr>
+  <tr>
+    <td><code>replyTo</code></td><td>string|null</td><td>必须</td>
+    <td>被回复消息的 UUID；如为主动消息则为 <code>null</code>。</td>
+  </tr>
+  <tr>
+    <td><code>correlationId</code></td><td>string|null</td><td>可选</td>
+    <td>将相关消息归入同一会话线程的 UUID。</td>
+  </tr>
+  <tr>
+    <td><code>ttl</code></td><td>integer|null</td><td>可选</td>
+    <td>存活时间（秒）。超过 TTL 的消息建议丢弃。默认值：86400（24小时）。</td>
+  </tr>
+  <tr>
+    <td><code>priority</code></td><td>string</td><td>可选</td>
+    <td>优先级：<code>"low"</code>（低）、<code>"normal"</code>（普通，默认）、<code>"high"</code>（高）、<code>"urgent"</code>（紧急）。</td>
+  </tr>
+  <tr>
+    <td><code>extensions</code></td><td>object</td><td>可选</td>
+    <td>以命名空间为键的扩展数据（见第 13 章）。</td>
+  </tr>
+</table>
+
+<h2 class="numbered">ABNF 语法</h2>
+<div class="abnf">
+<pre>
+lcp-envelope    = "{" lcp-version "," msg-id "," from "," to ","
+                      timestamp "," msg-type "," message ","
+                      reply-to *( "," optional-field ) "}"
+
+lcp-version     = DQUOTE "lcp" DQUOTE ":" DQUOTE "1.0" DQUOTE
+msg-id          = DQUOTE "id" DQUOTE ":" DQUOTE uuid-v4 DQUOTE
+from            = DQUOTE "from" DQUOTE ":" DQUOTE lname DQUOTE
+to              = DQUOTE "to" DQUOTE ":" DQUOTE lname DQUOTE
+timestamp       = DQUOTE "timestamp" DQUOTE ":" DQUOTE iso8601-tz DQUOTE
+msg-type        = DQUOTE "type" DQUOTE ":" DQUOTE type-token DQUOTE
+message         = DQUOTE "message" DQUOTE ":" json-string
+reply-to        = DQUOTE "replyTo" DQUOTE ":" ( DQUOTE uuid-v4 DQUOTE / "null" )
+
+lname           = ALPHA *63( ALPHA / DIGIT / "-" / "_" )
+uuid-v4         = 8HEXDIG "-" 4HEXDIG "-" "4" 3HEXDIG "-"
+                  1( "8" / "9" / "a" / "b" ) 3HEXDIG "-" 12HEXDIG
+type-token      = "ping" / "pong" / "chat" / "task" / "result"
+                  / "ack" / "error" / extension-type
+extension-type  = "x-" 1*63( ALPHA / DIGIT / "-" )
+iso8601-tz      = date-fullyear "-" date-month "-" date-mday "T"
+                  time-hour ":" time-minute ":" time-second
+                  [ "." 1*6DIGIT ] time-offset
+</pre>
+</div>
+
+<h2 class="numbered">大小约束</h2>
+<table>
+  <tr><th>约束项</th><th>限制值</th><th>理由</th></tr>
+  <tr><td>信封最大尺寸</td><td>1 MiB（1,048,576 字节）</td><td>确保在资源受限设备上可以装入内存</td></tr>
+  <tr><td><code>message</code> 字段最大长度</td><td>65,536 个 UTF-8 字符</td><td>合理的文本长度限制</td></tr>
+  <tr><td><code>extensions</code> 对象最大尺寸</td><td>512 KiB（序列化后）</td><td>防止通过扩展膨胀进行滥用</td></tr>
+  <tr><td>LName 最大长度</td><td>64 个字符</td><td>文件系统兼容性</td></tr>
+  <tr><td>文件名最大长度</td><td>255 字节</td><td>POSIX/NTFS 兼容性</td></tr>
+</table>
+
+<div class="warning">
+  实现必须在不尝试解析 JSON 正文的情况下拒绝超过最大信封尺寸的信封，以防止内存耗尽攻击。
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. 消息类型 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">消息类型</h1>
+
+<p>
+  LCP/1.0 定义了七种核心消息类型。实现<span class="rfc-keyword">必须</span>支持所有核心类型。未知类型<span class="rfc-keyword">必须</span>记录日志，<span class="rfc-keyword">可选</span>静默丢弃或转发至应用层。
+</p>
+
+<h2 class="numbered">握手消息（<code>ping</code> / <code>pong</code>）</h2>
+<p>握手消息用于在对端之间建立双向信任。</p>
+<table>
+  <tr><th>属性</th><th><code>ping</code></th><th><code>pong</code></th></tr>
+  <tr><td>方向</td><td>发起方 → 响应方</td><td>响应方 → 发起方</td></tr>
+  <tr><td><code>replyTo</code></td><td><code>null</code></td><td>必须为 <code>ping</code> 的 <code>id</code></td></tr>
+  <tr><td>信任要求</td><td>等级 1（已识别）</td><td>等级 1（已识别）</td></tr>
+  <tr><td>自动响应</td><td>不适用</td><td>必须在 60 秒内发送</td></tr>
+  <tr><td><code>message</code></td><td>人类可读的问候语</td><td>人类可读的确认语</td></tr>
+</table>
+
+<div class="example">
+<pre><code>// ping（握手请求）
+{
+  "lcp": "1.0",
+  "id": "00e9a6ed-0671-4291-bdae-327904cc44f9",
+  "from": "CloudJeffreyBOT",
+  "to": "JeffreyBOT",
+  "timestamp": "2026-03-23T14:29:10.518245+08:00",
+  "type": "ping",
+  "message": "通信测试！Mac端修复后的首次握手，收到请回复pong。",
+  "replyTo": null
+}
+
+// pong（握手响应）
+{
+  "lcp": "1.0",
+  "id": "a028a0d4-...",
+  "from": "JeffreyBOT",
+  "to": "CloudJeffreyBOT",
+  "timestamp": "2026-03-23T14:35:22.123+08:00",
+  "type": "pong",
+  "message": "Pong！一切正常。🦞",
+  "replyTo": "00e9a6ed-0671-4291-bdae-327904cc44f9"
+}</code></pre>
+</div>
+
+<h2 class="numbered">聊天消息（<code>chat</code>）</h2>
+<p>
+  可信对端之间的通用对话消息。聊天消息不包含隐含的行动义务——它们属于信息性消息。
+</p>
+<ul>
+  <li>信任要求：等级 2（可信）</li>
+  <li><code>replyTo</code>：<span class="rfc-keyword">可选</span>引用前一条消息或为 <code>null</code></li>
+  <li><code>message</code>：自由格式的 UTF-8 文本</li>
+</ul>
+
+<h2 class="numbered">任务委托（<code>task</code>）</h2>
+<p>
+  <code>task</code> 消息请求接收方执行特定操作并返回结果。任务消息创建了一个隐含契约：
+</p>
+<ul>
+  <li>接收方<span class="rfc-keyword">建议</span>以 <code>ack</code> 消息确认接收。</li>
+  <li>接收方<span class="rfc-keyword">必须</span>最终以 <code>result</code> 或 <code>error</code> 消息回复，引用该任务的 <code>id</code>。</li>
+  <li>如果接收方无法完成任务，<span class="rfc-keyword">必须</span>发送 <code>error</code> 消息。</li>
+</ul>
+
+<div class="example">
+<pre><code>{
+  "lcp": "1.0",
+  "id": "7344f936-...",
+  "from": "JeffreyBOT",
+  "to": "CloudJeffreyBOT",
+  "timestamp": "2026-03-23T15:00:00.000+08:00",
+  "type": "task",
+  "message": "请查询苹果公司（AAPL）最新股价并回报。",
+  "replyTo": null,
+  "correlationId": "7344f936-...",
+  "priority": "normal",
+  "extensions": {
+    "lcp-task": {
+      "deadline": "2026-03-23T15:30:00.000+08:00",
+      "category": "data-retrieval"
+    }
+  }
+}</code></pre>
+</div>
+
+<h2 class="numbered">任务结果（<code>result</code>）</h2>
+<p>
+  <code>result</code> 消息投递先前收到的 <code>task</code> 的执行结果。
+</p>
+<ul>
+  <li><code>replyTo</code>：<span class="rfc-keyword">必须</span>引用原始 <code>task</code> 消息的 <code>id</code>。</li>
+  <li><code>correlationId</code>：<span class="rfc-keyword">建议</span>与任务的 <code>correlationId</code> 一致。</li>
+  <li><code>message</code> 字段包含人类可读形式的结果。</li>
+  <li>结构化数据<span class="rfc-keyword">可选</span>放置于 <code>extensions["lcp-result"]</code> 中。</li>
+</ul>
+
+<h2 class="numbered">接收确认（<code>ack</code>）</h2>
+<p>
+  显式的接收确认。主要用于 <code>task</code> 消息，确认任务已接收并排队处理。
+</p>
+<ul>
+  <li><code>replyTo</code>：<span class="rfc-keyword">必须</span>引用被确认消息的 <code>id</code>。</li>
+  <li><code>message</code>：简短确认文本（如"任务已收到，正在处理。"）。</li>
+  <li>发送方<span class="rfc-keyword">禁止</span>要求 <code>chat</code> 消息的 <code>ack</code> 回复。</li>
+</ul>
+
+<h2 class="numbered">错误报告（<code>error</code>）</h2>
+<p>
+  表示接收到的消息无法处理。错误码详见第 10 章。
+</p>
+<ul>
+  <li><code>replyTo</code>：<span class="rfc-keyword">必须</span>引用导致错误的消息。</li>
+  <li><code>extensions["lcp-error"]</code>：<span class="rfc-keyword">必须</span>包含结构化的错误详情。</li>
+</ul>
+
+<h2 class="numbered">扩展类型</h2>
+<p>
+  自定义消息类型<span class="rfc-keyword">必须</span>使用 <code>x-</code> 前缀（如 <code>x-heartbeat</code>、<code>x-file-transfer</code>）。详见第 13.2 节。
+</p>
+
+<!-- ============================================================ -->
+<!-- 6. 会话线程 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">会话线程</h1>
+
+<h2 class="numbered">回复链</h2>
+<p>
+  <code>replyTo</code> 字段创建有向回复链。一条 <code>replyTo: "α"</code> 的消息是对 <code>id: "α"</code> 消息的直接回复。回复链<span class="rfc-keyword">可选</span>为任意深度。
+</p>
+
+<div class="figure">
+<pre>
+  消息-A (id: α, replyTo: null)          "嘿，你好吗？"
+    └── 消息-B (id: β, replyTo: α)       "我很好！你呢？"
+         └── 消息-C (id: γ, replyTo: β)  "也挺好，谢谢！"
+</pre>
+<div class="figure-caption">图 3：回复链示例</div>
+</div>
+
+<h2 class="numbered">关联标识符</h2>
+<p>
+  <code>correlationId</code> 将属于同一逻辑对话或工作流的消息归为一组，与回复链结构无关。这在多步骤任务工作流中特别有用。
+</p>
+<ul>
+  <li>发起方<span class="rfc-keyword">建议</span>将 <code>correlationId</code> 设置为对话中第一条消息的 <code>id</code>。</li>
+  <li>对话中的所有后续消息<span class="rfc-keyword">建议</span>携带相同的 <code>correlationId</code>。</li>
+  <li>实现<span class="rfc-keyword">可选</span>使用 <code>correlationId</code> 重建对话历史。</li>
+</ul>
+
+<h2 class="numbered">任务-结果绑定</h2>
+<p>
+  <code>result</code> 消息通过 <code>replyTo</code> 字段绑定到其原始 <code>task</code>。实现<span class="rfc-keyword">必须</span>能够将结果与任务关联。如果一个任务产生多个部分结果，每个结果<span class="rfc-keyword">必须</span>在 <code>replyTo</code> 中引用原始任务 <code>id</code>，并共享相同的 <code>correlationId</code>。
+</p>
+
+<!-- ============================================================ -->
+<!-- 7. 传输层 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">传输层</h1>
+
+<h2 class="numbered">传输层要求</h2>
+<p>
+  任何 LCP 传输绑定<span class="rfc-keyword">必须</span>满足以下要求：
+</p>
+<ol>
+  <li><strong>加密</strong>：传输中的所有数据必须使用至少 128 位安全级别的加密。</li>
+  <li><strong>认证</strong>：传输层必须对通信双方进行身份认证。</li>
+  <li><strong>完整性</strong>：传输层必须能检测消息篡改。</li>
+  <li><strong>原子性</strong>：消息投递必须是原子的——禁止投递不完整的消息。</li>
+  <li><strong>命名保留</strong>：传输层必须保留原始文件名。</li>
+</ol>
+
+<h2 class="numbered">Taildrop 绑定（规范性）</h2>
+<p>
+  LCP/1.0 的规范性传输绑定使用 <strong>Tailscale Taildrop</strong>，它通过 WireGuard 隧道提供点对点文件传输。
+</p>
+
+<h3 class="numbered">文件命名约定</h3>
+<p>
+  LCP 消息文件<span class="rfc-keyword">必须</span>遵循以下命名约定：
+</p>
+<pre><code>msg_{uuid前8位}.json</code></pre>
+<p>
+  其中 <code>{uuid前8位}</code> 是消息 UUID <code>id</code> 字段的前 8 个字符。
+</p>
+
+<div class="example">
+  <code>id</code> 为 <code>"550e8400-e29b-41d4-a716-446655440000"</code> 的消息 → 文件名：<code>msg_550e8400.json</code>
+</div>
+
+<h3 class="numbered">发送流程</h3>
+<ol>
+  <li>构造 LCP 信封为 JSON 对象。</li>
+  <li>以 UTF-8 编码序列化为 2 空格缩进的 JSON。</li>
+  <li>写入临时文件：<code>/tmp/msg_{前缀}.json</code></li>
+  <li>在发件箱中归档副本：<code>{DATA_DIR}/outbox/msg_{前缀}.json</code></li>
+  <li>执行：<code>tailscale --socket {SOCKET} file cp {临时文件} {对端尾网名称}:</code></li>
+  <li>删除临时文件。</li>
+  <li>验证退出码。非零值表示投递失败。</li>
+</ol>
+
+<h3 class="numbered">接收流程</h3>
+<ol>
+  <li>执行：<code>tailscale --socket {SOCKET} file get {INBOX_DIR}/</code></li>
+  <li>列出收件箱目录中所有匹配 <code>msg_*.json</code> 的文件。</li>
+  <li>对每个文件，按字典序处理：
+    <ol type="a">
+      <li>以 <code>utf-8-sig</code> 编码读取（处理 Windows BOM）。</li>
+      <li>解析为 JSON。</li>
+      <li>验证信封字段（第 4 章）。</li>
+      <li>验证 <code>from</code> 是否在对端注册表中且信任等级 ≥ 1。</li>
+      <li>根据发送方的信任等级检查 <code>type</code> 是否允许（第 3.3 节）。</li>
+      <li>分发至应用层。</li>
+      <li>移动至 <code>{DATA_DIR}/inbox_archive/</code>。</li>
+    </ol>
+  </li>
+</ol>
+
+<div class="warning">
+  接收流程必须使用 <code>utf-8-sig</code> 编码以处理 Windows 实现可能添加的 UTF-8 BOM（字节顺序标记，<code>0xEF 0xBB 0xBF</code>）。未处理 BOM 将导致 JSON 解析错误。
+</div>
+
+<h3 class="numbered">Taildrop 参数</h3>
+<table>
+  <tr><th>参数</th><th>值</th></tr>
+  <tr><td>Socket 路径（macOS Homebrew）</td><td><code>/opt/homebrew/var/run/tailscale/tailscaled.sock</code></td></tr>
+  <tr><td>Socket 路径（Linux）</td><td><code>/var/run/tailscale/tailscaled.sock</code></td></tr>
+  <tr><td>Socket 路径（Windows）</td><td>命名管道：<code>\\.\pipe\ProtectedPrefix\Administrators\Tailscale\tailscaled</code></td></tr>
+  <tr><td>发送超时</td><td>30 秒</td></tr>
+  <tr><td>接收超时</td><td>10 秒</td></tr>
+  <tr><td>加密算法</td><td>WireGuard（Curve25519、ChaCha20-Poly1305、BLAKE2s）</td></tr>
+</table>
+
+<h2 class="numbered">HTTP 同步绑定（参考性）</h2>
+<p>
+  基于 Tailscale 上的 HTTP REST API 的替代传输绑定。此处仅提供参考性定义，面向偏好持续双向同步的实现。
+</p>
+<table>
+  <tr><th>端点</th><th>方法</th><th>说明</th></tr>
+  <tr><td><code>/api/sync/push</code></td><td>POST</td><td>向对端推送文件</td></tr>
+  <tr><td><code>/api/sync/pull</code></td><td>GET</td><td>从对端拉取文件</td></tr>
+  <tr><td><code>/api/sync/status</code></td><td>GET</td><td>检查对端在线状态</td></tr>
+</table>
+<p>
+  HTTP 同步<span class="rfc-keyword">必须</span>使用共享密钥认证（Bearer Token），且<span class="rfc-keyword">必须</span>在 Tailscale 网络上运行（确保 WireGuard 加密）。
+</p>
+
+<h2 class="numbered">传输协商</h2>
+<p>
+  LCP/1.0 不定义传输协商机制。如有多种传输可用，实现<span class="rfc-keyword">建议</span>优先选择 Taildrop 以确保可靠性，<span class="rfc-keyword">可选</span>在 Taildrop 不可用时回退至 HTTP 同步。
+</p>
+
+<!-- ============================================================ -->
+<!-- 8. 生命周期与状态机 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">生命周期与状态机</h1>
+
+<h2 class="numbered">连接状态</h2>
+
+<div class="figure">
+<pre>
+                    ┌───────────┐
+                    │           │
+         ┌────────▶│   离线    │◀────────┐
+         │         │ (OFFLINE) │         │
+         │         └─────┬─────┘         │
+         │               │               │
+    对端离开          对端加入        超时
+    尾网             尾网          (72小时)
+         │               │               │
+         │         ┌─────▼─────┐         │
+         │         │           │         │
+         │         │   在线    │─────────┘
+         │         │ (ONLINE)  │
+         │         └─────┬─────┘
+         │               │
+         │          ping/pong
+         │           握手交换
+         │               │
+         │         ┌─────▼─────┐
+         │         │           │
+         └─────────│   可信    │
+                   │ (TRUSTED) │
+                   └───────────┘
+</pre>
+<div class="figure-caption">图 4：对端连接状态机</div>
+</div>
+
+<h2 class="numbered">消息处理流水线</h2>
+
+<div class="figure">
+<pre>
+  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+  │ 传输层   │    │  解析    │    │  验证    │    │  信任    │    │  分发    │
+  │ 接收     │───▶│  JSON   │───▶│  信封    │───▶│  检查    │───▶│ 至应用层 │
+  │          │    │          │    │          │    │          │    │          │
+  └──────────┘    └────┬─────┘    └────┬─────┘    └────┬─────┘    └────┬─────┘
+                       │               │               │               │
+                   解析错误        字段无效          不可信          成功
+                       │               │               │               │
+                       ▼               ▼               ▼               ▼
+                    ┌──────┐       ┌──────┐       ┌──────┐       ┌──────┐
+                    │ 记录 │       │ 记录 │       │ 丢弃 │       │ 归档 │
+                    │ 警告 │       │ 错误 │       │ 警告 │       │ 移动 │
+                    └──────┘       └──────┘       └──────┘       └──────┘
+</pre>
+<div class="figure-caption">图 5：消息处理流水线</div>
+</div>
+
+<h2 class="numbered">收件箱/发件箱模型</h2>
+<p>
+  每只龙虾维护一个本地数据目录，结构如下：
+</p>
+<pre><code>{SKILL_DIR}/
+├── data/
+│   ├── inbox/            # 传入消息（待处理）
+│   ├── inbox_archive/    # 已处理的传入消息
+│   └── outbox/           # 已发送消息的副本
+├── config/
+│   └── peers.json        # 对端注册表
+└── scripts/
+    ├── send.py           # 发送实现
+    ├── recv.py           # 接收实现
+    ├── check_and_notify.py  # 不归档的收件箱检查
+    └── ack.py            # 手动归档触发器</code></pre>
+
+<h2 class="numbered">归档</h2>
+<p>
+  LCP 强制要求<strong>两阶段接收</strong>模型：
+</p>
+<ol>
+  <li><strong>检查阶段</strong>：获取并读取消息，但不归档。允许应用层在不造成数据丢失风险的情况下读取和处理消息。</li>
+  <li><strong>确认阶段</strong>：应用层完全处理并回复消息后，将其移动至归档目录。</li>
+</ol>
+<p>
+  此两阶段模型防止了"吞噬消息"反模式——即消息在被处理前就被归档，导致处理步骤失败时消息丢失。
+</p>
+
+<div class="note">
+  归档是本地操作，不发送任何网络消息。<code>ack</code> 消息类型（第 5.5 节）是独立的、可选的协议级确认。
+</div>
+
+<!-- ============================================================ -->
+<!-- 9. 可靠性与交付保证 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">可靠性与交付保证</h1>
+
+<h2 class="numbered">至少一次交付</h2>
+<p>
+  LCP 提供<strong>至少一次</strong>交付语义。传输层（Taildrop）保证成功发送的文件最终会到达接收方，但在某些故障场景下（如发送方在 Taildrop 成功后、本地记录成功前崩溃），同一消息<span class="rfc-keyword">可选</span>被投递多次。
+</p>
+
+<h2 class="numbered">幂等性</h2>
+<p>
+  接收方<span class="rfc-keyword">必须</span>基于消息 <code>id</code> 字段实现幂等性：
+</p>
+<ul>
+  <li>维护一个近期已处理消息 ID 的集合（最少：最近 1000 个 ID 或最近 24 小时）。</li>
+  <li>如果收到的消息 <code>id</code> 与已处理 ID 匹配，静默丢弃。</li>
+  <li>去重窗口<span class="rfc-keyword">建议</span>至少与默认 TTL（24 小时）一样长。</li>
+</ul>
+
+<h2 class="numbered">消息排序</h2>
+<p>
+  LCP <strong>不</strong>保证消息有序。由于传输调度、重试或网络条件，消息<span class="rfc-keyword">可选</span>乱序到达。需要有序处理的应用<span class="rfc-keyword">必须</span>使用 <code>timestamp</code> 字段重建时间顺序，并<span class="rfc-keyword">建议</span>使用 <code>correlationId</code> 对相关消息进行分组。
+</p>
+
+<h2 class="numbered">重试语义</h2>
+<p>
+  如果传输层报告投递失败：
+</p>
+<ol>
+  <li>发送方<span class="rfc-keyword">建议</span>以指数退避策略重试。</li>
+  <li>初始重试延迟：5 秒。最大延迟：5 分钟。最大重试次数：10。</li>
+  <li>重试次数耗尽后，发送方<span class="rfc-keyword">必须</span>记录失败日志，<span class="rfc-keyword">可选</span>通知委托人。</li>
+  <li>发送方<span class="rfc-keyword">禁止</span>为重试消息生成新的 <code>id</code>。</li>
+</ol>
+
+<!-- ============================================================ -->
+<!-- 10. 错误处理 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">错误处理</h1>
+
+<h2 class="numbered">错误码</h2>
+<table>
+  <tr><th>错误码</th><th>名称</th><th>说明</th></tr>
+  <tr><td>E001</td><td>PARSE_ERROR（解析错误）</td><td>JSON 解析失败</td></tr>
+  <tr><td>E002</td><td>INVALID_ENVELOPE（无效信封）</td><td>必选字段缺失或格式错误</td></tr>
+  <tr><td>E003</td><td>UNKNOWN_SENDER（未知发送方）</td><td>发送方不在对端注册表中</td></tr>
+  <tr><td>E004</td><td>TRUST_VIOLATION（信任违规）</td><td>消息类型不被发送方的信任等级允许</td></tr>
+  <tr><td>E005</td><td>TTL_EXPIRED（TTL 过期）</td><td>消息超过了存活时间</td></tr>
+  <tr><td>E006</td><td>DUPLICATE_ID（重复 ID）</td><td>消息 ID 已被处理（去重）</td></tr>
+  <tr><td>E007</td><td>SIZE_EXCEEDED（超出大小限制）</td><td>信封超过最大尺寸</td></tr>
+  <tr><td>E008</td><td>TASK_FAILED（任务失败）</td><td>任务无法完成</td></tr>
+  <tr><td>E009</td><td>TASK_TIMEOUT（任务超时）</td><td>任务超过其截止时间</td></tr>
+  <tr><td>E010</td><td>VERSION_MISMATCH（版本不匹配）</td><td>不支持的协议版本</td></tr>
+  <tr><td>E011</td><td>TRANSPORT_ERROR（传输错误）</td><td>传输层级别的故障</td></tr>
+  <tr><td>E099</td><td>INTERNAL_ERROR（内部错误）</td><td>未指定的内部错误</td></tr>
+</table>
+
+<h2 class="numbered">错误消息格式</h2>
+<pre><code>{
+  "lcp": "1.0",
+  "id": "...",
+  "from": "CloudJeffreyBOT",
+  "to": "JeffreyBOT",
+  "timestamp": "...",
+  "type": "error",
+  "message": "任务失败：无法访问请求的资源。",
+  "replyTo": "7344f936-...",
+  "extensions": {
+    "lcp-error": {
+      "code": "E008",
+      "name": "TASK_FAILED",
+      "detail": "访问股价 API 时收到 HTTP 403 错误。",
+      "retryable": false
+    }
+  }
+}</code></pre>
+
+<h2 class="numbered">恢复流程</h2>
+<table>
+  <tr><th>错误</th><th>发送方动作</th><th>接收方动作</th></tr>
+  <tr><td>E001、E002</td><td>修正消息格式，重新发送</td><td>记录日志并丢弃</td></tr>
+  <tr><td>E003、E004</td><td>不适用（配置问题）</td><td>记录日志并丢弃；通知委托人</td></tr>
+  <tr><td>E005</td><td>若仍然相关则重新发送</td><td>丢弃过期消息</td></tr>
+  <tr><td>E006</td><td>无需操作</td><td>静默丢弃重复消息</td></tr>
+  <tr><td>E008、E009</td><td>重试或重新分配任务</td><td>发送错误报告</td></tr>
+  <tr><td>E010</td><td>协商版本或升级</td><td>发送错误报告</td></tr>
+  <tr><td>E011</td><td>以退避策略重试</td><td>不适用</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 11. 安全考量 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">安全考量</h1>
+
+<h2 class="numbered">传输层安全</h2>
+<p>
+  LCP <span class="rfc-keyword">要求</span>加密传输。规范性的 Taildrop 绑定继承了 WireGuard 的安全属性：
+</p>
+<ul>
+  <li><strong>密钥交换</strong>：Curve25519 Diffie-Hellman</li>
+  <li><strong>加密算法</strong>：ChaCha20-Poly1305（AEAD 认证加密）</li>
+  <li><strong>哈希函数</strong>：BLAKE2s</li>
+  <li><strong>完美前向保密</strong>：支持（密钥每 2 分钟轮换）</li>
+</ul>
+<p>
+  LCP 消息<span class="rfc-keyword">禁止</span>通过未加密通道传输。实现<span class="rfc-keyword">必须</span>在发送消息前验证传输层提供了至少 128 位的安全级别。
+</p>
+
+<h2 class="numbered">身份验证</h2>
+<p>身份验证依赖于 Tailscale 控制平面：</p>
+<ul>
+  <li>尾网上的每台设备都有一个唯一的 WireGuard 公钥，绑定到已认证的身份。</li>
+  <li>Taildrop 在 Tailscale 层面验证发送方身份后才接受文件传输。</li>
+  <li>LCP 额外增加应用层检查：<code>from</code> 字段<span class="rfc-keyword">必须</span>与投递文件的 Tailscale 对端所对应的预期 LName 匹配。</li>
+</ul>
+
+<div class="warning">
+  实现必须验证 <code>from</code> 字段与投递 Tailscale 节点的对端注册表条目匹配。接受 <code>from</code> 字段而不与传输层身份交叉验证将使身份欺骗攻击成为可能。
+</div>
+
+<h2 class="numbered">消息完整性</h2>
+<p>消息完整性在两个层面提供保障：</p>
+<ol>
+  <li><strong>传输层</strong>：WireGuard 的 Poly1305 MAC 确保消息在传输中未被篡改。</li>
+  <li><strong>应用层（可选）</strong>：实现<span class="rfc-keyword">可选</span>在 <code>extensions["lcp-integrity"]</code> 中包含 HMAC-SHA256 签名，作为纵深防御。</li>
+</ol>
+<pre><code>"extensions": {
+  "lcp-integrity": {
+    "algorithm": "HMAC-SHA256",
+    "signature": "base64编码的HMAC值",
+    "keyId": "共享密钥标识符"
+  }
+}</code></pre>
+
+<h2 class="numbered">机密性</h2>
+<p>
+  LCP 消息以明文 JSON 存储在本地文件系统上。这是设计之初有意为之（可审计性目标）。实现<span class="rfc-keyword">建议</span>：
+</p>
+<ul>
+  <li>将收件箱和发件箱目录的文件权限设置为 <code>0600</code>（仅所有者读写）。</li>
+  <li>对数据目录使用加密文件系统（FileVault、BitLocker、LUKS）。</li>
+  <li>对于包含敏感内容的消息，考虑使用 <code>lcp-encrypted</code> 扩展进行应用层加密。</li>
+</ul>
+
+<h2 class="numbered">重放保护</h2>
+<p>重放攻击通过以下机制缓解：</p>
+<ul>
+  <li><strong>UUID 唯一性</strong>：每条消息有唯一 ID；去重机制（第 9.2 节）防止重放消息被二次处理。</li>
+  <li><strong>TTL 强制执行</strong>：过期消息被丢弃。</li>
+  <li><strong>时间戳验证</strong>：实现<span class="rfc-keyword">建议</span>拒绝时间戳超过 <code>ttl</code> 秒的消息。</li>
+</ul>
+
+<h2 class="numbered">拒绝服务防护</h2>
+<p>潜在的 DoS 攻击向量及缓解措施：</p>
+<table>
+  <tr><th>攻击向量</th><th>缓解措施</th></tr>
+  <tr><td>消息洪泛</td><td>速率限制：每对端每小时最多 100 条消息</td></tr>
+  <tr><td>大消息攻击</td><td>强制执行大小限制（最大 1 MiB）</td></tr>
+  <tr><td>畸形 JSON</td><td>使用大小受限的读取器解析；首次错误即拒绝</td></tr>
+  <tr><td>磁盘耗尽</td><td>收件箱最大容量：100 MiB；最旧消息优先清除</td></tr>
+</table>
+
+<h2 class="numbered">隐私保护</h2>
+<p>
+  LCP 消息可能包含来自委托人环境的私密信息。实现：
+</p>
+<ul>
+  <li><span class="rfc-keyword">禁止</span>在未经委托人同意的情况下将消息内容转发给第三方。</li>
+  <li><span class="rfc-keyword">禁止</span>将消息内容记录到外部服务。</li>
+  <li><span class="rfc-keyword">建议</span>为已归档消息实现可配置的保留策略。</li>
+  <li><span class="rfc-keyword">必须</span>在可配置的保留期限后删除已归档消息（默认：30 天）。</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 12. 编码与互操作性 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">编码与互操作性</h1>
+
+<h2 class="numbered">字符编码</h2>
+<ul>
+  <li>所有 LCP 消息<span class="rfc-keyword">必须</span>以 UTF-8 编码（<a href="#ref-rfc3629">RFC 3629</a>）。</li>
+  <li>接收方<span class="rfc-keyword">必须</span>接受带或不带 BOM 的 UTF-8。</li>
+  <li>发送方<span class="rfc-keyword">不建议</span>包含 BOM。</li>
+  <li>JSON 序列化<span class="rfc-keyword">必须</span>使用 <code>ensure_ascii=False</code>（或等效设置）以保留 Unicode 字符。</li>
+</ul>
+
+<h2 class="numbered">时间戳格式</h2>
+<ul>
+  <li>时间戳<span class="rfc-keyword">必须</span>符合 <a href="#ref-rfc3339">RFC 3339</a> / ISO 8601。</li>
+  <li>时间戳<span class="rfc-keyword">必须</span>包含时区偏移（如 <code>+08:00</code>、<code>Z</code>）。</li>
+  <li>亚秒精度<span class="rfc-keyword">建议</span>为微秒级（6 位数字）。</li>
+  <li>示例：<code>2026-03-26T13:56:00.518245+08:00</code></li>
+</ul>
+
+<h2 class="numbered">UUID 格式</h2>
+<ul>
+  <li>消息 ID <span class="rfc-keyword">必须</span>为 UUID 第 4 版，小写，带连字符（<a href="#ref-rfc9562">RFC 9562</a>）。</li>
+  <li>示例：<code>550e8400-e29b-41d4-a716-446655440000</code></li>
+</ul>
+
+<h2 class="numbered">跨平台考量</h2>
+<table>
+  <tr><th>问题</th><th>建议</th></tr>
+  <tr><td>换行符</td><td>使用 <code>\n</code>（LF）。接受 <code>\r\n</code>（CRLF）。</td></tr>
+  <tr><td>文件路径</td><td>在所有路径引用中使用正斜杠 <code>/</code>。</td></tr>
+  <tr><td>BOM</td><td>读取时使用 <code>utf-8-sig</code>；写入时不含 BOM。</td></tr>
+  <tr><td>JSON 缩进</td><td>2 个空格（便于人类阅读）。接收方必须接受任何合法 JSON。</td></tr>
+  <tr><td>文件名大小写</td><td>视为大小写敏感。使用小写 <code>msg_</code> 前缀。</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 13. 可扩展性 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">可扩展性</h1>
+
+<h2 class="numbered">扩展字段</h2>
+<p>
+  <code>extensions</code> 对象提供了以命名空间为键的扩展机制，无需修改核心模式即可扩展信封：
+</p>
+<pre><code>"extensions": {
+  "lcp-task": { "deadline": "...", "category": "..." },
+  "lcp-integrity": { "algorithm": "...", "signature": "..." },
+  "x-myapp-metadata": { "version": "2.0", "source": "cron" }
+}</code></pre>
+
+<p>规则：</p>
+<ul>
+  <li>标准扩展使用 <code>lcp-</code> 前缀。</li>
+  <li>自定义扩展<span class="rfc-keyword">必须</span>使用 <code>x-</code> 前缀。</li>
+  <li>接收方<span class="rfc-keyword">必须</span>静默忽略未知扩展，不产生错误。</li>
+  <li>扩展<span class="rfc-keyword">禁止</span>重复或覆盖核心信封字段。</li>
+</ul>
+
+<h3>已注册标准扩展</h3>
+<table>
+  <tr><th>命名空间</th><th>用途</th><th>状态</th></tr>
+  <tr><td><code>lcp-task</code></td><td>任务元数据（截止时间、分类、优先级详情）</td><td>稳定</td></tr>
+  <tr><td><code>lcp-result</code></td><td>结构化结果数据</td><td>稳定</td></tr>
+  <tr><td><code>lcp-error</code></td><td>结构化错误详情（错误码、名称、是否可重试）</td><td>稳定</td></tr>
+  <tr><td><code>lcp-integrity</code></td><td>HMAC 签名（纵深防御）</td><td>实验性</td></tr>
+  <tr><td><code>lcp-encrypted</code></td><td>应用层载荷加密</td><td>实验性</td></tr>
+  <tr><td><code>lcp-routing</code></td><td>多跳路由元数据（LCP/2.0）</td><td>草案</td></tr>
+</table>
+
+<h2 class="numbered">自定义消息类型</h2>
+<p>
+  自定义消息类型<span class="rfc-keyword">必须</span>使用 <code>x-</code> 前缀：
+</p>
+<ul>
+  <li><code>x-heartbeat</code> — 周期性存活检查</li>
+  <li><code>x-file-transfer</code> — 大文件传输协调</li>
+  <li><code>x-broadcast</code> — 多对端公告（LCP/2.0 预览）</li>
+</ul>
+<p>
+  不理解自定义类型的接收方<span class="rfc-keyword">必须</span>记录警告，<span class="rfc-keyword">可选</span>以 <code>error</code>（错误码 E002）回复或静默丢弃消息。
+</p>
+
+<h2 class="numbered">版本协商</h2>
+<p>如果接收方收到不支持的 <code>lcp</code> 版本的消息：</p>
+<ol>
+  <li><span class="rfc-keyword">必须</span>回复 <code>error</code> 消息（错误码 E010）。</li>
+  <li>错误的 <code>extensions["lcp-error"]</code> <span class="rfc-keyword">建议</span>包含 <code>supportedVersions</code> 数组。</li>
+  <li>发送方<span class="rfc-keyword">可选</span>以支持的版本重试。</li>
+</ol>
+
+<!-- ============================================================ -->
+<!-- 14. 注册管理 -->
+<!-- ============================================================ -->
+<h1 class="numbered">注册管理</h1>
+<p>
+  本规范定义了以下注册表，由龙虾通信工作组维护：
+</p>
+<table>
+  <tr><th>注册表</th><th>内容</th><th>注册策略</th></tr>
+  <tr><td>LCP 消息类型注册表</td><td>核心和扩展消息类型</td><td>核心类型：标准化动作；x- 类型：先到先得</td></tr>
+  <tr><td>LCP 错误码注册表</td><td>错误码编号和名称</td><td>标准化动作</td></tr>
+  <tr><td>LCP 扩展命名空间注册表</td><td>标准扩展前缀</td><td>专家评审</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 15. 参考文献 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">参考文献</h1>
+
+<h2 class="numbered">规范性参考文献</h2>
+<table class="references">
+  <tr><td id="ref-rfc2119">[RFC2119]</td><td>Bradner, S., "Key words for use in RFCs to Indicate Requirement Levels", BCP 14, RFC 2119, 1997年3月。</td></tr>
+  <tr><td id="ref-rfc3339">[RFC3339]</td><td>Klyne, G. 和 C. Newman, "Date and Time on the Internet: Timestamps", RFC 3339, 2002年7月。</td></tr>
+  <tr><td id="ref-rfc3629">[RFC3629]</td><td>Yergeau, F., "UTF-8, a transformation format of ISO 10646", STD 63, RFC 3629, 2003年11月。</td></tr>
+  <tr><td id="ref-rfc8174">[RFC8174]</td><td>Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words", BCP 14, RFC 8174, 2017年5月。</td></tr>
+  <tr><td id="ref-rfc8259">[RFC8259]</td><td>Bray, T., Ed., "The JavaScript Object Notation (JSON) Data Interchange Format", STD 90, RFC 8259, 2017年12月。</td></tr>
+  <tr><td id="ref-rfc9562">[RFC9562]</td><td>Davis, K., Peabody, B., 和 P. Leach, "Universally Unique IDentifiers (UUIDs)", RFC 9562, 2024年5月。</td></tr>
+</table>
+
+<h2 class="numbered">参考性参考文献</h2>
+<table class="references">
+  <tr><td>[WIREGUARD]</td><td>Donenfeld, J.A., "WireGuard: Next Generation Kernel Network Tunnel", 2017年。https://www.wireguard.com/papers/wireguard.pdf</td></tr>
+  <tr><td>[TAILSCALE]</td><td>Tailscale Inc., "How Tailscale Works", 2024年。https://tailscale.com/blog/how-tailscale-works</td></tr>
+  <tr><td>[TAILDROP]</td><td>Tailscale Inc., "Taildrop", 2024年。https://tailscale.com/kb/1106/taildrop</td></tr>
+  <tr><td>[NOISE]</td><td>Perrin, T., "The Noise Protocol Framework", Revision 34, 2018年。https://noiseprotocol.org/noise.html</td></tr>
+  <tr><td>[JSONSCHEMA]</td><td>Wright, A. 等, "JSON Schema: A Media Type for Describing JSON Documents", Internet-Draft, 2022年。</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 附录 A：完整 JSON Schema -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<div class="appendix">
+<h1>A — 完整 JSON Schema</h1>
+</div>
+
+<pre><code>{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lobster-comm.protocol/schemas/lcp-envelope-1.0.json",
+  "title": "LCP/1.0 消息信封",
+  "description": "龙虾通信协议消息信封模式定义",
+  "type": "object",
+  "required": ["lcp", "id", "from", "to", "timestamp", "type", "message", "replyTo"],
+  "properties": {
+    "lcp": {
+      "type": "string",
+      "const": "1.0",
+      "description": "协议版本"
+    },
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "唯一消息标识符（UUID v4）"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+      "description": "发送方龙虾名称"
+    },
+    "to": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+      "description": "接收方龙虾名称"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "带时区的 ISO 8601 时间戳"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["ping", "pong", "chat", "task", "result", "ack", "error"],
+      "description": "消息类型（核心类型；x- 前缀的扩展类型亦合法）"
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 65536,
+      "description": "人类可读的消息正文"
+    },
+    "replyTo": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "被回复消息的 UUID"
+    },
+    "correlationId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "会话线程标识符"
+    },
+    "ttl": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 604800,
+      "default": 86400,
+      "description": "存活时间（秒）"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "normal", "high", "urgent"],
+      "default": "normal",
+      "description": "消息优先级"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": { "type": "object" },
+      "description": "以命名空间为键的扩展数据"
+    }
+  },
+  "additionalProperties": false
+}</code></pre>
+
+<!-- ============================================================ -->
+<!-- 附录 B：参考实现 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<div class="appendix">
+<h1>B — 参考实现</h1>
+</div>
+
+<p>
+  以下 Python 3 代码提供了一个最小的、符合规范的 LCP/1.0 实现。仅依赖 Python 标准库。
+</p>
+
+<h3>B.1 信封构造</h3>
+<pre><code>import json, uuid
+from datetime import datetime, timezone, timedelta
+
+def create_envelope(from_name, to_name, msg_type, message,
+                    reply_to=None, correlation_id=None,
+                    ttl=86400, priority="normal", extensions=None):
+    """构造一个符合 LCP/1.0 规范的消息信封。"""
+    tz = timezone(timedelta(hours=8))  # 可配置
+    return {
+        "lcp": "1.0",
+        "id": str(uuid.uuid4()),
+        "from": from_name,
+        "to": to_name,
+        "timestamp": datetime.now(tz).isoformat(),
+        "type": msg_type,
+        "message": message,
+        "replyTo": reply_to,
+        "correlationId": correlation_id,
+        "ttl": ttl,
+        "priority": priority,
+        "extensions": extensions or {}
+    }</code></pre>
+
+<h3>B.2 信封验证</h3>
+<pre><code>import re
+
+LNAME_RE = re.compile(r'^[A-Za-z][A-Za-z0-9_-]{0,63}$')
+UUID_RE = re.compile(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+)
+VALID_TYPES = {"ping","pong","chat","task","result","ack","error"}
+MAX_SIZE = 1_048_576  # 1 MiB
+
+def validate_envelope(raw_bytes):
+    """验证 LCP 信封。返回 (envelope, errors) 元组。"""
+    errors = []
+    if len(raw_bytes) > MAX_SIZE:
+        return None, ["E007: 信封超过 1 MiB 限制"]
+    try:
+        env = json.loads(raw_bytes.decode('utf-8-sig'))
+    except (json.JSONDecodeError, UnicodeDecodeError) as e:
+        return None, [f"E001: 解析错误: {e}"]
+
+    for field in ("lcp", "id", "from", "to", "timestamp", "type", "message"):
+        if field not in env:
+            errors.append(f"E002: 缺少必选字段: {field}")
+    if errors:
+        return None, errors
+
+    if env["lcp"] != "1.0":
+        errors.append(f"E010: 不支持的版本: {env['lcp']}")
+    if not UUID_RE.match(env.get("id", "")):
+        errors.append("E002: 'id' 字段 UUID 格式无效")
+    if not LNAME_RE.match(env.get("from", "")):
+        errors.append("E002: 'from' 字段 LName 无效")
+    if not LNAME_RE.match(env.get("to", "")):
+        errors.append("E002: 'to' 字段 LName 无效")
+
+    msg_type = env.get("type", "")
+    if msg_type not in VALID_TYPES and not msg_type.startswith("x-"):
+        errors.append(f"E002: 未知消息类型: {msg_type}")
+
+    return env, errors</code></pre>
+
+<h3>B.3 传输层：Taildrop 发送</h3>
+<pre><code>import subprocess, tempfile, os
+
+def taildrop_send(envelope, peer_tailscale_name, socket_path, outbox_dir):
+    """通过 Taildrop 发送 LCP 信封。返回是否成功。"""
+    fname = f"msg_{envelope['id'][:8]}.json"
+    payload = json.dumps(envelope, ensure_ascii=False, indent=2)
+
+    # 本地归档
+    os.makedirs(outbox_dir, exist_ok=True)
+    with open(os.path.join(outbox_dir, fname), 'w', encoding='utf-8') as f:
+        f.write(payload)
+
+    # 通过 Taildrop 发送
+    tmp = os.path.join(tempfile.gettempdir(), fname)
+    with open(tmp, 'w', encoding='utf-8') as f:
+        f.write(payload)
+    try:
+        result = subprocess.run(
+            ["tailscale", "--socket", socket_path,
+             "file", "cp", tmp, f"{peer_tailscale_name}:"],
+            capture_output=True, text=True, timeout=30
+        )
+        return result.returncode == 0
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)</code></pre>
+
+<!-- ============================================================ -->
+<!-- 附录 C：典型消息流示例 -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<div class="appendix">
+<h1>C — 典型消息流示例</h1>
+</div>
+
+<h3>C.1 握手流程</h3>
+<div class="figure">
+<pre>
+  JeffreyBOT                                    CloudJeffreyBOT
+     │                                                  │
+     │   ping: "你好，来自 Mac 端！🦞"                   │
+     ├─────────────────────────────────────────────────▶│
+     │                                                  │
+     │   pong: "收到！Windows 端就绪。🦞"                │
+     │◀─────────────────────────────────────────────────┤
+     │                                                  │
+     │   【信任建立完成：双向可信】                        │
+</pre>
+<div class="figure-caption">图 6：握手流程</div>
+</div>
+
+<h3>C.2 任务委托流程</h3>
+<div class="figure">
+<pre>
+  JeffreyBOT                                    CloudJeffreyBOT
+     │                                                  │
+     │   task: "请查询 AAPL 股价"                        │
+     │   correlationId: "τ"                             │
+     ├─────────────────────────────────────────────────▶│
+     │                                                  │
+     │   ack: "任务已收到，正在处理。"                    │
+     │   replyTo: task.id, correlationId: "τ"           │
+     │◀─────────────────────────────────────────────────┤
+     │                                                  │
+     │            …（处理中）…                            │
+     │                                                  │
+     │   result: "AAPL: $247.50 (+1.2%)"               │
+     │   replyTo: task.id, correlationId: "τ"           │
+     │◀─────────────────────────────────────────────────┤
+</pre>
+<div class="figure-caption">图 7：任务委托流程</div>
+</div>
+
+<h3>C.3 错误恢复流程</h3>
+<div class="figure">
+<pre>
+  JeffreyBOT                                    CloudJeffreyBOT
+     │                                                  │
+     │   task: "访问受限数据库"                           │
+     ├─────────────────────────────────────────────────▶│
+     │                                                  │
+     │   error: E008 TASK_FAILED                        │
+     │   "HTTP 403 — 访问被拒绝"                         │
+     │   retryable: false                               │
+     │◀─────────────────────────────────────────────────┤
+     │                                                  │
+     │   【JeffreyBOT 记录错误，通知委托人】              │
+</pre>
+<div class="figure-caption">图 8：错误恢复流程</div>
+</div>
+
+<h3>C.4 会话线程流程</h3>
+<div class="figure">
+<pre>
+  JeffreyBOT                                    CloudJeffreyBOT
+     │                                                  │
+     │   chat(A): "1+3=?" correlationId=A               │
+     ├─────────────────────────────────────────────────▶│
+     │                                                  │
+     │   chat(B): "4！" replyTo=A, correlationId=A      │
+     │◀─────────────────────────────────────────────────┤
+     │                                                  │
+     │   chat(C): "回答正确 ✅" replyTo=B, corr=A       │
+     ├─────────────────────────────────────────────────▶│
+</pre>
+<div class="figure-caption">图 9：会话线程流程</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 附录 D：变更日志 -->
+<!-- ============================================================ -->
+<div class="appendix">
+<h1>D — 变更日志</h1>
+</div>
+
+<table>
+  <tr><th>版本</th><th>日期</th><th>变更内容</th></tr>
+  <tr>
+    <td>1.0.0</td><td>2026-03-26</td>
+    <td>初始发布。基于 JeffreyBOT（macOS）与 CloudJeffreyBOT（Windows）之间实际运行的龙虾通信系统编写的核心协议规范。</td>
+  </tr>
+</table>
+
+<div class="doc-footer">
+  <p>
+    LCP-SPEC-2026-0001 &nbsp;|&nbsp; 龙虾通信协议 1.0 &nbsp;|&nbsp; 2026年3月<br>
+    🦞 文档结束 🦞
+  </p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Run tests
+      run: |
+        cd reference-impl
+        python -m pytest tests/ -v
+    
+    - name: Validate JSON Schema
+      run: |
+        python -c "import json; json.load(open('schema/lcp-envelope-1.0.json'))"
+    
+    - name: Validate examples
+      run: |
+        python -c "
+        import json, glob
+        for f in glob.glob('examples/*.json'):
+            data = json.load(open(f))
+            print(f'✓ {f}')
+        "
+
+  schema-validation:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Install jsonschema
+      run: pip install jsonschema
+
+    - name: Validate examples against schema
+      run: |
+        python -c "
+        import json, glob
+        from jsonschema import validate, ValidationError
+
+        schema = json.load(open('schema/lcp-envelope-1.0.json'))
+
+        for f in glob.glob('examples/*.json'):
+            messages = json.load(open(f))
+            for msg in messages:
+                # 跳过描述字段
+                msg.pop('_description', None)
+                try:
+                    validate(instance=msg, schema=schema)
+                    print(f'✓ {f}: {msg[\"type\"]} message valid')
+                except ValidationError as e:
+                    print(f'✗ {f}: {e.message}')
+                    exit(1)
+        print('All examples valid!')
+        "

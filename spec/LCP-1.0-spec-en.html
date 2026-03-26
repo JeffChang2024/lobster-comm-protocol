@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LCP/1.0 — Lobster Communication Protocol Specification</title>
+<style>
+@page {
+  size: A4;
+  margin: 25mm 20mm 25mm 20mm;
+}
+
+body {
+  font-family: "Times New Roman", "Noto Serif CJK SC", serif;
+  font-size: 11pt;
+  line-height: 1.6;
+  color: #111;
+  max-width: 170mm;
+  margin: 0 auto;
+  padding: 20px 40px;
+  background: #fff;
+}
+
+/* ===== TITLE PAGE ===== */
+.title-page {
+  text-align: center;
+  page-break-after: always;
+  padding-top: 80px;
+}
+.title-page .logo {
+  font-size: 72pt;
+  margin-bottom: 20px;
+}
+.title-page h1 {
+  font-size: 22pt;
+  font-weight: bold;
+  margin: 10px 0 5px;
+  letter-spacing: 1px;
+}
+.title-page .subtitle {
+  font-size: 14pt;
+  font-weight: normal;
+  color: #444;
+  margin-bottom: 30px;
+}
+.title-page .doc-id {
+  font-family: "Courier New", monospace;
+  font-size: 12pt;
+  color: #666;
+  margin: 20px 0;
+  padding: 8px 20px;
+  border: 1px solid #ccc;
+  display: inline-block;
+}
+.title-page .meta-table {
+  margin: 40px auto;
+  border-collapse: collapse;
+  font-size: 10pt;
+  text-align: left;
+}
+.title-page .meta-table td {
+  padding: 4px 16px;
+  border: none;
+}
+.title-page .meta-table td:first-child {
+  font-weight: bold;
+  color: #555;
+  width: 120px;
+}
+.title-page .status-badge {
+  display: inline-block;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 4px 16px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 10pt;
+  margin-top: 10px;
+}
+.title-page .copyright {
+  margin-top: 60px;
+  font-size: 9pt;
+  color: #888;
+}
+
+/* ===== HEADINGS ===== */
+h1 {
+  font-size: 18pt;
+  border-bottom: 2px solid #333;
+  padding-bottom: 4px;
+  margin-top: 30px;
+}
+h2 {
+  font-size: 14pt;
+  border-bottom: 1px solid #999;
+  padding-bottom: 3px;
+  margin-top: 24px;
+}
+h3 {
+  font-size: 12pt;
+  margin-top: 18px;
+}
+h4 {
+  font-size: 11pt;
+  font-style: italic;
+  margin-top: 14px;
+}
+
+/* ===== SECTION NUMBERING ===== */
+body { counter-reset: h1counter; }
+h1.numbered { counter-reset: h2counter; }
+h1.numbered::before {
+  counter-increment: h1counter;
+  content: counter(h1counter) ". ";
+}
+h2.numbered { counter-reset: h3counter; }
+h2.numbered::before {
+  counter-increment: h2counter;
+  content: counter(h1counter) "." counter(h2counter) " ";
+}
+h3.numbered::before {
+  counter-increment: h3counter;
+  content: counter(h1counter) "." counter(h2counter) "." counter(h3counter) " ";
+}
+
+/* ===== TABLE OF CONTENTS ===== */
+.toc {
+  page-break-after: always;
+}
+.toc h2 { border-bottom: 2px solid #333; }
+.toc ul {
+  list-style: none;
+  padding-left: 0;
+}
+.toc li {
+  padding: 3px 0;
+  border-bottom: 1px dotted #ccc;
+}
+.toc li.l2 { padding-left: 20px; }
+.toc li.l3 { padding-left: 40px; font-size: 10pt; }
+
+/* ===== TABLES ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+  font-size: 10pt;
+}
+th, td {
+  border: 1px solid #999;
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: #f0f0f0;
+  font-weight: bold;
+}
+tr:nth-child(even) { background: #fafafa; }
+
+/* ===== CODE ===== */
+code {
+  font-family: "Courier New", "Menlo", monospace;
+  font-size: 9.5pt;
+  background: #f5f5f5;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+pre {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-left: 3px solid #c62828;
+  padding: 10px 14px;
+  font-family: "Courier New", monospace;
+  font-size: 9pt;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* ===== SPECIAL BLOCKS ===== */
+.rfc-keyword {
+  font-weight: bold;
+  font-variant: small-caps;
+  letter-spacing: 0.5px;
+}
+.note {
+  background: #e3f2fd;
+  border-left: 4px solid #1565c0;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-size: 10pt;
+}
+.note::before {
+  content: "NOTE: ";
+  font-weight: bold;
+  color: #1565c0;
+}
+.warning {
+  background: #fff3e0;
+  border-left: 4px solid #e65100;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-size: 10pt;
+}
+.warning::before {
+  content: "SECURITY: ";
+  font-weight: bold;
+  color: #e65100;
+}
+.example {
+  background: #f1f8e9;
+  border-left: 4px solid #558b2f;
+  padding: 10px 14px;
+  margin: 12px 0;
+}
+.example::before {
+  content: "Example: ";
+  font-weight: bold;
+  color: #558b2f;
+  font-size: 10pt;
+}
+
+/* ===== FIGURE ===== */
+.figure {
+  text-align: center;
+  margin: 16px 0;
+}
+.figure pre {
+  display: inline-block;
+  text-align: left;
+  border-left-color: #555;
+}
+.figure-caption {
+  font-size: 10pt;
+  font-style: italic;
+  color: #555;
+  margin-top: 4px;
+}
+
+/* ===== ABNF ===== */
+.abnf pre {
+  border-left-color: #6a1b9a;
+  background: #faf5ff;
+}
+
+/* ===== REFERENCES ===== */
+.references td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 100px;
+}
+
+/* ===== PAGE BREAKS ===== */
+.page-break { page-break-before: always; }
+
+/* ===== ABSTRACT ===== */
+.abstract {
+  border: 1px solid #999;
+  padding: 16px 20px;
+  margin: 20px 0;
+  background: #fcfcfc;
+}
+.abstract h3 { margin-top: 0; }
+
+/* ===== APPENDIX ===== */
+.appendix h1::before { content: "Appendix " !important; counter-increment: none !important; }
+
+/* ===== FOOTER-LIKE ===== */
+.doc-footer {
+  margin-top: 40px;
+  padding-top: 10px;
+  border-top: 1px solid #ccc;
+  font-size: 9pt;
+  color: #888;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- TITLE PAGE -->
+<!-- ============================================================ -->
+<div class="title-page">
+  <div class="logo">🦞</div>
+  <h1>Lobster Communication Protocol</h1>
+  <div class="subtitle">LCP/1.0 — Specification</div>
+  <div class="doc-id">LCP-SPEC-2026-0001</div>
+  <br>
+  <div class="status-badge">PROPOSED STANDARD</div>
+
+  <table class="meta-table">
+    <tr><td>Document:</td><td>LCP/1.0 Protocol Specification</td></tr>
+    <tr><td>Version:</td><td>1.0.0</td></tr>
+    <tr><td>Date:</td><td>March 26, 2026</td></tr>
+    <tr><td>Authors:</td><td>JeffreyBOT (OpenClaw Agent)</td></tr>
+    <tr><td>Advisors:</td><td>Jeffrey Zhang</td></tr>
+    <tr><td>Category:</td><td>Standards Track</td></tr>
+    <tr><td>Status:</td><td>Proposed Standard</td></tr>
+    <tr><td>License:</td><td>CC BY 4.0</td></tr>
+  </table>
+
+  <div class="copyright">
+    Copyright &copy; 2026 Lobster Communication Working Group.<br>
+    This document is released under the Creative Commons Attribution 4.0 International License.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ABSTRACT & STATUS -->
+<!-- ============================================================ -->
+<div class="abstract">
+  <h3>Abstract</h3>
+  <p>
+    This document defines the <strong>Lobster Communication Protocol (LCP)</strong>, version 1.0,
+    a peer-to-peer, trust-based messaging protocol designed for autonomous AI agents ("Lobsters")
+    to exchange structured messages over secure overlay networks. LCP specifies the message envelope
+    format, message types and semantics, transport bindings, identity model, trust establishment,
+    lifecycle management, error handling, and security considerations.
+  </p>
+  <p>
+    LCP is transport-agnostic by design. This specification defines one normative transport binding
+    (Tailscale Taildrop over WireGuard) and provides an extension framework for future bindings.
+    The protocol is intended to be minimal, auditable, and implementable in any programming language
+    with access to a JSON serializer and a file-transfer mechanism.
+  </p>
+</div>
+
+<div class="abstract">
+  <h3>Status of This Memo</h3>
+  <p>
+    This is a <em>Proposed Standard</em>. It represents the consensus of the Lobster Communication
+    Working Group and has been reviewed by the community. Implementations are encouraged, and
+    feedback is welcome. This document may be updated, replaced, or obsoleted by future versions.
+  </p>
+  <p>
+    The key words "<span class="rfc-keyword">MUST</span>", "<span class="rfc-keyword">MUST NOT</span>",
+    "<span class="rfc-keyword">REQUIRED</span>", "<span class="rfc-keyword">SHALL</span>",
+    "<span class="rfc-keyword">SHALL NOT</span>", "<span class="rfc-keyword">SHOULD</span>",
+    "<span class="rfc-keyword">SHOULD NOT</span>", "<span class="rfc-keyword">RECOMMENDED</span>",
+    "<span class="rfc-keyword">MAY</span>", and "<span class="rfc-keyword">OPTIONAL</span>" in this
+    document are to be interpreted as described in <a href="#ref-rfc2119">RFC 2119</a> and
+    <a href="#ref-rfc8174">RFC 8174</a>.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- TABLE OF CONTENTS -->
+<!-- ============================================================ -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ul>
+    <li>1. Introduction</li>
+    <li class="l2">1.1 Motivation</li>
+    <li class="l2">1.2 Design Goals</li>
+    <li class="l2">1.3 Scope</li>
+    <li class="l2">1.4 Terminology</li>
+    <li>2. Protocol Overview</li>
+    <li class="l2">2.1 Architecture</li>
+    <li class="l2">2.2 Communication Model</li>
+    <li class="l2">2.3 Protocol Stack</li>
+    <li>3. Identity Model</li>
+    <li class="l2">3.1 Agent Identifiers</li>
+    <li class="l2">3.2 Peer Discovery</li>
+    <li class="l2">3.3 Trust Establishment</li>
+    <li>4. Message Envelope</li>
+    <li class="l2">4.1 Envelope Schema</li>
+    <li class="l2">4.2 Field Definitions</li>
+    <li class="l2">4.3 ABNF Grammar</li>
+    <li class="l2">4.4 Size Constraints</li>
+    <li>5. Message Types</li>
+    <li class="l2">5.1 Handshake Messages (ping / pong)</li>
+    <li class="l2">5.2 Chat Messages (chat)</li>
+    <li class="l2">5.3 Task Delegation (task)</li>
+    <li class="l2">5.4 Task Results (result)</li>
+    <li class="l2">5.5 Acknowledgments (ack)</li>
+    <li class="l2">5.6 Error Reports (error)</li>
+    <li class="l2">5.7 Extension Types</li>
+    <li>6. Conversation Threading</li>
+    <li class="l2">6.1 Reply Chains</li>
+    <li class="l2">6.2 Correlation Identifiers</li>
+    <li class="l2">6.3 Task-Result Binding</li>
+    <li>7. Transport Layer</li>
+    <li class="l2">7.1 Transport Requirements</li>
+    <li class="l2">7.2 Taildrop Binding (Normative)</li>
+    <li class="l2">7.3 HTTP Sync Binding (Informative)</li>
+    <li class="l2">7.4 Transport Negotiation</li>
+    <li>8. Lifecycle &amp; State Machine</li>
+    <li class="l2">8.1 Connection States</li>
+    <li class="l2">8.2 Message Processing Pipeline</li>
+    <li class="l2">8.3 Inbox / Outbox Model</li>
+    <li class="l2">8.4 Archival</li>
+    <li>9. Reliability &amp; Delivery Guarantees</li>
+    <li class="l2">9.1 At-Least-Once Delivery</li>
+    <li class="l2">9.2 Idempotency</li>
+    <li class="l2">9.3 Ordering</li>
+    <li class="l2">9.4 Retry Semantics</li>
+    <li>10. Error Handling</li>
+    <li class="l2">10.1 Error Codes</li>
+    <li class="l2">10.2 Error Message Format</li>
+    <li class="l2">10.3 Recovery Procedures</li>
+    <li>11. Security Considerations</li>
+    <li class="l2">11.1 Transport Security</li>
+    <li class="l2">11.2 Identity Verification</li>
+    <li class="l2">11.3 Message Integrity</li>
+    <li class="l2">11.4 Confidentiality</li>
+    <li class="l2">11.5 Replay Protection</li>
+    <li class="l2">11.6 Denial of Service</li>
+    <li class="l2">11.7 Privacy</li>
+    <li>12. Encoding &amp; Interoperability</li>
+    <li class="l2">12.1 Character Encoding</li>
+    <li class="l2">12.2 Timestamp Format</li>
+    <li class="l2">12.3 UUID Format</li>
+    <li class="l2">12.4 Cross-Platform Considerations</li>
+    <li>13. Extensibility</li>
+    <li class="l2">13.1 Extension Fields</li>
+    <li class="l2">13.2 Custom Message Types</li>
+    <li class="l2">13.3 Version Negotiation</li>
+    <li>14. IANA-Like Considerations</li>
+    <li>15. References</li>
+    <li class="l2">15.1 Normative References</li>
+    <li class="l2">15.2 Informative References</li>
+    <li>Appendix A: Complete JSON Schema</li>
+    <li>Appendix B: Reference Implementation</li>
+    <li>Appendix C: Example Message Flows</li>
+    <li>Appendix D: Change Log</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- 1. INTRODUCTION -->
+<!-- ============================================================ -->
+<h1 class="numbered">Introduction</h1>
+
+<h2 class="numbered">Motivation</h2>
+<p>
+  As autonomous AI agents become increasingly prevalent in personal computing environments,
+  a critical gap has emerged: the lack of a standardized, peer-to-peer communication protocol
+  specifically designed for agent-to-agent messaging. Existing protocols (HTTP, XMPP, MQTT)
+  are designed for human-to-human, human-to-machine, or machine-to-machine scenarios that
+  assume fundamentally different trust models, identity semantics, and interaction patterns.
+</p>
+<p>
+  The <strong>Lobster Communication Protocol (LCP)</strong> addresses this gap. It provides
+  a minimal, secure, and auditable messaging standard for AI agents ("Lobsters") that operate
+  on behalf of a human principal and need to coordinate across machines and network boundaries.
+</p>
+<p>
+  The name "Lobster" is both a project codename and a metaphor: lobsters maintain hard shells
+  (security boundaries) while communicating through precise, well-defined signal channels.
+  Like lobsters in the ocean, LCP agents maintain distinct territories (host machines) while
+  establishing reliable communication channels between them.
+</p>
+
+<h2 class="numbered">Design Goals</h2>
+<p>LCP is designed around the following principles:</p>
+<ol>
+  <li><strong>Simplicity</strong> — The protocol must be implementable in under 200 lines of any mainstream language.</li>
+  <li><strong>Auditability</strong> — All messages are stored as human-readable JSON files with full audit trails.</li>
+  <li><strong>Security by Default</strong> — Transport encryption is mandatory; messages never traverse unencrypted channels.</li>
+  <li><strong>Transport Agnosticism</strong> — The message format is independent of the underlying delivery mechanism.</li>
+  <li><strong>Offline Tolerance</strong> — The protocol must gracefully handle peers being temporarily unreachable.</li>
+  <li><strong>Zero Infrastructure</strong> — No central server, message broker, or cloud service is required.</li>
+  <li><strong>Human Oversight</strong> — All messages are logged and auditable by the human principal.</li>
+</ol>
+
+<h2 class="numbered">Scope</h2>
+<p>
+  This specification defines:
+</p>
+<ul>
+  <li>The LCP message envelope format and serialization</li>
+  <li>Core message types and their semantics</li>
+  <li>Identity model and trust establishment</li>
+  <li>Transport binding for Tailscale Taildrop</li>
+  <li>Lifecycle management and state machines</li>
+  <li>Error handling and reliability guarantees</li>
+  <li>Security model and threat mitigations</li>
+  <li>Extensibility framework</li>
+</ul>
+<p>
+  This specification does <em>not</em> define:
+</p>
+<ul>
+  <li>The internal architecture of LCP agents</li>
+  <li>Application-level semantics beyond message delivery</li>
+  <li>Multi-party (group) communication (deferred to LCP/2.0)</li>
+  <li>Binary payload encoding (deferred to a future extension)</li>
+</ul>
+
+<h2 class="numbered">Terminology</h2>
+<table>
+  <tr><th>Term</th><th>Definition</th></tr>
+  <tr><td>Lobster</td><td>An autonomous AI agent that implements the LCP protocol.</td></tr>
+  <tr><td>Peer</td><td>A remote Lobster with which a local Lobster communicates.</td></tr>
+  <tr><td>Principal</td><td>The human owner/operator who authorizes and oversees the Lobster.</td></tr>
+  <tr><td>Envelope</td><td>The JSON object that wraps every LCP message.</td></tr>
+  <tr><td>Tailnet</td><td>A Tailscale-managed WireGuard mesh network connecting authorized devices.</td></tr>
+  <tr><td>Taildrop</td><td>Tailscale's peer-to-peer file transfer mechanism.</td></tr>
+  <tr><td>Inbox</td><td>The local directory where incoming messages are received.</td></tr>
+  <tr><td>Outbox</td><td>The local directory where copies of sent messages are archived.</td></tr>
+  <tr><td>Channel</td><td>A logical communication path between two Lobsters.</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 2. PROTOCOL OVERVIEW -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Protocol Overview</h1>
+
+<h2 class="numbered">Architecture</h2>
+<p>
+  LCP follows a <strong>decentralized peer-to-peer</strong> architecture. Each Lobster operates
+  independently on a host machine and communicates directly with its peers without intermediary
+  servers. The architecture consists of three layers:
+</p>
+
+<div class="figure">
+<pre>
+┌─────────────────────────────────────────────────────────────┐
+│                    APPLICATION LAYER                         │
+│  ┌─────────────┐                        ┌─────────────┐    │
+│  │  Lobster A   │                        │  Lobster B   │    │
+│  │  (Agent)     │                        │  (Agent)     │    │
+│  └──────┬───────┘                        └───────┬──────┘    │
+│         │                                        │           │
+├─────────┼────────────────────────────────────────┼───────────┤
+│         │          PROTOCOL LAYER (LCP/1.0)      │           │
+│  ┌──────┴───────┐                        ┌───────┴──────┐    │
+│  │  Envelope    │  ─── JSON Messages ──▶ │  Envelope    │    │
+│  │  Processor   │  ◀── JSON Messages ─── │  Processor   │    │
+│  └──────┬───────┘                        └───────┬──────┘    │
+│         │                                        │           │
+├─────────┼────────────────────────────────────────┼───────────┤
+│         │          TRANSPORT LAYER               │           │
+│  ┌──────┴───────┐                        ┌───────┴──────┐    │
+│  │  Taildrop /  │  ═══ Encrypted ══════▶ │  Taildrop /  │    │
+│  │  HTTP Sync   │  ◀═══ Tunnel ════════  │  HTTP Sync   │    │
+│  └──────────────┘                        └──────────────┘    │
+│              ▲          WireGuard             ▲               │
+│              └───────────────────────────────┘               │
+│                     Tailscale Tailnet                        │
+└─────────────────────────────────────────────────────────────┘
+</pre>
+<div class="figure-caption">Figure 1: LCP Three-Layer Architecture</div>
+</div>
+
+<h2 class="numbered">Communication Model</h2>
+<p>
+  LCP uses an <strong>asynchronous, store-and-forward</strong> communication model:
+</p>
+<ol>
+  <li>The sender constructs an LCP envelope, serializes it to JSON, and writes it to a temporary file.</li>
+  <li>The transport layer delivers the file to the recipient's inbox directory.</li>
+  <li>The recipient periodically polls its inbox (or receives push notification) and processes new messages.</li>
+  <li>Processed messages are moved to an archive directory for audit.</li>
+</ol>
+<p>
+  This model provides natural resilience against transient network failures: if a peer is offline,
+  the transport layer queues the message and delivers it when the peer becomes available.
+</p>
+
+<h2 class="numbered">Protocol Stack</h2>
+<table>
+  <tr><th>Layer</th><th>Component</th><th>Responsibility</th></tr>
+  <tr><td>4 - Application</td><td>Agent Logic</td><td>Interprets message semantics, generates responses</td></tr>
+  <tr><td>3 - Protocol</td><td>LCP/1.0</td><td>Envelope format, message types, threading, lifecycle</td></tr>
+  <tr><td>2 - Transport</td><td>Taildrop / HTTP Sync</td><td>Reliable file delivery between peers</td></tr>
+  <tr><td>1 - Network</td><td>WireGuard / Tailscale</td><td>Encrypted tunnel, peer authentication, NAT traversal</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 3. IDENTITY MODEL -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Identity Model</h1>
+
+<h2 class="numbered">Agent Identifiers</h2>
+<p>
+  Each Lobster is identified by a <strong>Lobster Name</strong> (LName), which is a human-readable
+  string that uniquely identifies the agent within a trust domain. LNames follow these rules:
+</p>
+<ul>
+  <li><span class="rfc-keyword">MUST</span> be between 1 and 64 UTF-8 characters.</li>
+  <li><span class="rfc-keyword">MUST</span> match the regular expression: <code>^[A-Za-z][A-Za-z0-9_-]{0,63}$</code></li>
+  <li><span class="rfc-keyword">MUST</span> be unique within a trust domain (Tailnet).</li>
+  <li><span class="rfc-keyword">SHOULD</span> be descriptive of the agent's role or host.</li>
+</ul>
+
+<div class="example">
+  Valid LNames: <code>JeffreyBOT</code>, <code>CloudJeffreyBOT</code>, <code>HomeAssistant-Agent</code>, <code>WorkPC_Bot</code>
+</div>
+
+<p>
+  For addressing across trust domains, the <strong>Fully Qualified Lobster Name (FQLN)</strong>
+  is used:
+</p>
+<pre><code>FQLN = LName "@" TailnetDomain
+Example: JeffreyBOT@tailnet-abcdef.ts.net</code></pre>
+
+<h2 class="numbered">Peer Discovery</h2>
+<p>
+  In LCP/1.0, peer discovery is <strong>static and pre-configured</strong>. Each Lobster maintains
+  a <strong>Peer Registry</strong> that maps LNames to transport addresses:
+</p>
+<pre><code>{
+  "peers": {
+    "CloudJeffreyBOT": {
+      "tailscale_name": "jeffrey-test",
+      "tailscale_ip": "100.123.217.84",
+      "transport": "taildrop",
+      "status": "trusted"
+    }
+  }
+}</code></pre>
+
+<div class="note">
+  LCP/2.0 MAY define a dynamic discovery mechanism using Tailscale's peer list API or mDNS
+  announcements. LCP/1.0 implementations SHOULD be prepared to support dynamic discovery
+  in future versions.
+</div>
+
+<h2 class="numbered">Trust Establishment</h2>
+<p>
+  LCP employs a <strong>three-tier trust model</strong>:
+</p>
+<table>
+  <tr><th>Trust Level</th><th>Name</th><th>Description</th><th>Allowed Operations</th></tr>
+  <tr>
+    <td>0</td><td>Unknown</td>
+    <td>Peer not in registry</td>
+    <td>Messages silently dropped</td>
+  </tr>
+  <tr>
+    <td>1</td><td>Recognized</td>
+    <td>Peer in registry, not yet verified</td>
+    <td><code>ping</code> / <code>pong</code> only</td>
+  </tr>
+  <tr>
+    <td>2</td><td>Trusted</td>
+    <td>Successful ping/pong handshake completed</td>
+    <td>All message types</td>
+  </tr>
+</table>
+
+<p>
+  Trust establishment follows this sequence:
+</p>
+
+<div class="figure">
+<pre>
+  Lobster A                                         Lobster B
+     │                                                  │
+     │  1. Principal configures B in A's peer registry  │
+     │  2. Principal configures A in B's peer registry  │
+     │                                                  │
+     ├──── ping {id: "α", from: "A", to: "B"} ────────▶│
+     │                                                  │
+     │◀─── pong {id: "β", replyTo: "α"} ──────────────┤
+     │                                                  │
+     │  Trust Level: A→B = Trusted, B→A = Trusted       │
+     │                                                  │
+     ├──── chat / task / result ───────────────────────▶│
+     │◀─── chat / task / result ───────────────────────┤
+</pre>
+<div class="figure-caption">Figure 2: Trust Establishment Handshake</div>
+</div>
+
+<p>
+  <strong>Trust Rules:</strong>
+</p>
+<ul>
+  <li>A Lobster <span class="rfc-keyword">MUST NOT</span> process <code>chat</code>, <code>task</code>, or <code>result</code> messages from Trust Level 0 or 1 peers.</li>
+  <li>A Lobster <span class="rfc-keyword">MUST</span> respond to a <code>ping</code> from a Trust Level 1 peer with a <code>pong</code>.</li>
+  <li>A Lobster <span class="rfc-keyword">MAY</span> downgrade a peer to Trust Level 1 after a configurable inactivity timeout (default: 72 hours).</li>
+  <li>The Principal <span class="rfc-keyword">MAY</span> revoke trust at any time by removing the peer from the registry.</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 4. MESSAGE ENVELOPE -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Message Envelope</h1>
+
+<h2 class="numbered">Envelope Schema</h2>
+<p>
+  Every LCP message is wrapped in a JSON envelope. The envelope is the atomic unit of
+  communication — it <span class="rfc-keyword">MUST</span> be a single, valid JSON object
+  serialized as a UTF-8 encoded file.
+</p>
+
+<pre><code>{
+  "lcp": "1.0",
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "from": "JeffreyBOT",
+  "to": "CloudJeffreyBOT",
+  "timestamp": "2026-03-26T13:56:00.000+08:00",
+  "type": "chat",
+  "message": "Hello from the ocean floor! 🦞",
+  "replyTo": null,
+  "correlationId": null,
+  "ttl": 86400,
+  "priority": "normal",
+  "extensions": {}
+}</code></pre>
+
+<h2 class="numbered">Field Definitions</h2>
+<table>
+  <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+  <tr>
+    <td><code>lcp</code></td><td>string</td><td>REQUIRED</td>
+    <td>Protocol version. MUST be <code>"1.0"</code> for this specification.</td>
+  </tr>
+  <tr>
+    <td><code>id</code></td><td>string</td><td>REQUIRED</td>
+    <td>Globally unique message identifier. MUST be a UUID v4 per <a href="#ref-rfc9562">RFC 9562</a>.</td>
+  </tr>
+  <tr>
+    <td><code>from</code></td><td>string</td><td>REQUIRED</td>
+    <td>LName of the sending Lobster. MUST match the sender's registered identity.</td>
+  </tr>
+  <tr>
+    <td><code>to</code></td><td>string</td><td>REQUIRED</td>
+    <td>LName of the intended recipient. MUST match a known peer.</td>
+  </tr>
+  <tr>
+    <td><code>timestamp</code></td><td>string</td><td>REQUIRED</td>
+    <td>ISO 8601 timestamp with timezone offset. MUST include sub-second precision.</td>
+  </tr>
+  <tr>
+    <td><code>type</code></td><td>string</td><td>REQUIRED</td>
+    <td>Message type. One of the registered types (see Section 5).</td>
+  </tr>
+  <tr>
+    <td><code>message</code></td><td>string</td><td>REQUIRED</td>
+    <td>Human-readable message body. MAY contain UTF-8 text including emoji.</td>
+  </tr>
+  <tr>
+    <td><code>replyTo</code></td><td>string|null</td><td>REQUIRED</td>
+    <td>UUID of the message being replied to, or <code>null</code> for unsolicited messages.</td>
+  </tr>
+  <tr>
+    <td><code>correlationId</code></td><td>string|null</td><td>OPTIONAL</td>
+    <td>UUID grouping related messages into a conversation thread.</td>
+  </tr>
+  <tr>
+    <td><code>ttl</code></td><td>integer|null</td><td>OPTIONAL</td>
+    <td>Time-to-live in seconds. Messages older than TTL SHOULD be discarded. Default: 86400 (24h).</td>
+  </tr>
+  <tr>
+    <td><code>priority</code></td><td>string</td><td>OPTIONAL</td>
+    <td>Priority level: <code>"low"</code>, <code>"normal"</code> (default), <code>"high"</code>, <code>"urgent"</code>.</td>
+  </tr>
+  <tr>
+    <td><code>extensions</code></td><td>object</td><td>OPTIONAL</td>
+    <td>Namespace-keyed extension data (see Section 13).</td>
+  </tr>
+</table>
+
+<h2 class="numbered">ABNF Grammar</h2>
+<div class="abnf">
+<pre>
+lcp-envelope    = "{" lcp-version "," msg-id "," from "," to ","
+                      timestamp "," msg-type "," message ","
+                      reply-to *( "," optional-field ) "}"
+
+lcp-version     = DQUOTE "lcp" DQUOTE ":" DQUOTE "1.0" DQUOTE
+msg-id          = DQUOTE "id" DQUOTE ":" DQUOTE uuid-v4 DQUOTE
+from            = DQUOTE "from" DQUOTE ":" DQUOTE lname DQUOTE
+to              = DQUOTE "to" DQUOTE ":" DQUOTE lname DQUOTE
+timestamp       = DQUOTE "timestamp" DQUOTE ":" DQUOTE iso8601-tz DQUOTE
+msg-type        = DQUOTE "type" DQUOTE ":" DQUOTE type-token DQUOTE
+message         = DQUOTE "message" DQUOTE ":" json-string
+reply-to        = DQUOTE "replyTo" DQUOTE ":" ( DQUOTE uuid-v4 DQUOTE / "null" )
+
+lname           = ALPHA *63( ALPHA / DIGIT / "-" / "_" )
+uuid-v4         = 8HEXDIG "-" 4HEXDIG "-" "4" 3HEXDIG "-"
+                  1( "8" / "9" / "a" / "b" ) 3HEXDIG "-" 12HEXDIG
+type-token      = "ping" / "pong" / "chat" / "task" / "result"
+                  / "ack" / "error" / extension-type
+extension-type  = "x-" 1*63( ALPHA / DIGIT / "-" )
+iso8601-tz      = date-fullyear "-" date-month "-" date-mday "T"
+                  time-hour ":" time-minute ":" time-second
+                  [ "." 1*6DIGIT ] time-offset
+</pre>
+</div>
+
+<h2 class="numbered">Size Constraints</h2>
+<table>
+  <tr><th>Constraint</th><th>Value</th><th>Rationale</th></tr>
+  <tr><td>Maximum envelope size</td><td>1 MiB (1,048,576 bytes)</td><td>Fits in memory on constrained devices</td></tr>
+  <tr><td>Maximum <code>message</code> field</td><td>65,536 UTF-8 characters</td><td>Reasonable text limit</td></tr>
+  <tr><td>Maximum <code>extensions</code> object</td><td>512 KiB serialized</td><td>Prevents abuse via extension bloat</td></tr>
+  <tr><td>Maximum LName length</td><td>64 characters</td><td>Filesystem compatibility</td></tr>
+  <tr><td>Maximum filename length</td><td>255 bytes</td><td>POSIX/NTFS compatibility</td></tr>
+</table>
+
+<div class="warning">
+  Implementations MUST reject envelopes exceeding the maximum envelope size without
+  attempting to parse the JSON body. This prevents memory exhaustion attacks.
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. MESSAGE TYPES -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Message Types</h1>
+
+<p>
+  LCP/1.0 defines seven core message types. Implementations <span class="rfc-keyword">MUST</span>
+  support all core types. Unknown types <span class="rfc-keyword">MUST</span> be logged and
+  <span class="rfc-keyword">MAY</span> be silently discarded or forwarded to the application layer.
+</p>
+
+<h2 class="numbered">Handshake Messages (<code>ping</code> / <code>pong</code>)</h2>
+<p>
+  Handshake messages establish bidirectional trust between peers.
+</p>
+<table>
+  <tr><th>Property</th><th><code>ping</code></th><th><code>pong</code></th></tr>
+  <tr><td>Direction</td><td>Initiator → Responder</td><td>Responder → Initiator</td></tr>
+  <tr><td><code>replyTo</code></td><td><code>null</code></td><td>MUST be the <code>id</code> of the <code>ping</code></td></tr>
+  <tr><td>Trust Required</td><td>Level 1 (Recognized)</td><td>Level 1 (Recognized)</td></tr>
+  <tr><td>Auto-response</td><td>N/A</td><td>MUST be sent within 60 seconds</td></tr>
+  <tr><td><code>message</code></td><td>Human-readable greeting</td><td>Human-readable acknowledgment</td></tr>
+</table>
+
+<div class="example">
+<pre><code>// ping
+{
+  "lcp": "1.0",
+  "id": "00e9a6ed-0671-4291-bdae-327904cc44f9",
+  "from": "CloudJeffreyBOT",
+  "to": "JeffreyBOT",
+  "timestamp": "2026-03-23T14:29:10.518245+08:00",
+  "type": "ping",
+  "message": "Communication test! First handshake after Mac-side fix. Reply pong if received.",
+  "replyTo": null
+}
+
+// pong (response)
+{
+  "lcp": "1.0",
+  "id": "a028a0d4-...",
+  "from": "JeffreyBOT",
+  "to": "CloudJeffreyBOT",
+  "timestamp": "2026-03-23T14:35:22.123+08:00",
+  "type": "pong",
+  "message": "Pong! All systems nominal. 🦞",
+  "replyTo": "00e9a6ed-0671-4291-bdae-327904cc44f9"
+}</code></pre>
+</div>
+
+<h2 class="numbered">Chat Messages (<code>chat</code>)</h2>
+<p>
+  General-purpose conversational messages between trusted peers. Chat messages carry
+  no implicit obligation for action — they are informational.
+</p>
+<ul>
+  <li>Trust Required: Level 2 (Trusted)</li>
+  <li><code>replyTo</code>: <span class="rfc-keyword">MAY</span> reference a previous message or be <code>null</code></li>
+  <li><code>message</code>: Free-form UTF-8 text</li>
+</ul>
+
+<h2 class="numbered">Task Delegation (<code>task</code>)</h2>
+<p>
+  A <code>task</code> message requests the recipient to perform a specific action and return
+  a result. Task messages create an implicit contract:
+</p>
+<ul>
+  <li>The recipient <span class="rfc-keyword">SHOULD</span> acknowledge receipt with an <code>ack</code> message.</li>
+  <li>The recipient <span class="rfc-keyword">MUST</span> eventually respond with a <code>result</code> or <code>error</code> message referencing the task's <code>id</code>.</li>
+  <li>If the recipient cannot complete the task, it <span class="rfc-keyword">MUST</span> send an <code>error</code> message.</li>
+</ul>
+
+<div class="example">
+<pre><code>{
+  "lcp": "1.0",
+  "id": "7344f936-...",
+  "from": "JeffreyBOT",
+  "to": "CloudJeffreyBOT",
+  "timestamp": "2026-03-23T15:00:00.000+08:00",
+  "type": "task",
+  "message": "Please check the latest stock price for AAPL and report back.",
+  "replyTo": null,
+  "correlationId": "7344f936-...",
+  "priority": "normal",
+  "extensions": {
+    "lcp-task": {
+      "deadline": "2026-03-23T15:30:00.000+08:00",
+      "category": "data-retrieval"
+    }
+  }
+}</code></pre>
+</div>
+
+<h2 class="numbered">Task Results (<code>result</code>)</h2>
+<p>
+  A <code>result</code> message delivers the outcome of a previously received <code>task</code>.
+</p>
+<ul>
+  <li><code>replyTo</code>: <span class="rfc-keyword">MUST</span> reference the original <code>task</code> message's <code>id</code>.</li>
+  <li><code>correlationId</code>: <span class="rfc-keyword">SHOULD</span> match the task's <code>correlationId</code>.</li>
+  <li>The <code>message</code> field contains the result in human-readable form.</li>
+  <li>Structured data <span class="rfc-keyword">MAY</span> be placed in <code>extensions["lcp-result"]</code>.</li>
+</ul>
+
+<h2 class="numbered">Acknowledgments (<code>ack</code>)</h2>
+<p>
+  An explicit receipt acknowledgment. Used primarily for <code>task</code> messages to confirm
+  the task has been received and queued for processing.
+</p>
+<ul>
+  <li><code>replyTo</code>: <span class="rfc-keyword">MUST</span> reference the acknowledged message's <code>id</code>.</li>
+  <li><code>message</code>: Brief acknowledgment text (e.g., "Task received, processing.").</li>
+  <li>Senders <span class="rfc-keyword">MUST NOT</span> require <code>ack</code> for <code>chat</code> messages.</li>
+</ul>
+
+<h2 class="numbered">Error Reports (<code>error</code>)</h2>
+<p>
+  Indicates that a received message could not be processed. See Section 10 for error codes.
+</p>
+<ul>
+  <li><code>replyTo</code>: <span class="rfc-keyword">MUST</span> reference the message that caused the error.</li>
+  <li><code>extensions["lcp-error"]</code>: <span class="rfc-keyword">MUST</span> contain structured error details.</li>
+</ul>
+
+<h2 class="numbered">Extension Types</h2>
+<p>
+  Custom message types <span class="rfc-keyword">MUST</span> use the <code>x-</code> prefix
+  (e.g., <code>x-heartbeat</code>, <code>x-file-transfer</code>). See Section 13.2 for details.
+</p>
+
+<!-- ============================================================ -->
+<!-- 6. CONVERSATION THREADING -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Conversation Threading</h1>
+
+<h2 class="numbered">Reply Chains</h2>
+<p>
+  The <code>replyTo</code> field creates directed reply chains. A message with
+  <code>replyTo: "α"</code> is a direct response to the message with <code>id: "α"</code>.
+  Reply chains <span class="rfc-keyword">MAY</span> be arbitrarily deep.
+</p>
+
+<div class="figure">
+<pre>
+  msg-A (id: α, replyTo: null)          "Hey, how are you?"
+    └── msg-B (id: β, replyTo: α)       "I'm good! You?"
+         └── msg-C (id: γ, replyTo: β)  "Great, thanks!"
+</pre>
+<div class="figure-caption">Figure 3: Reply Chain Example</div>
+</div>
+
+<h2 class="numbered">Correlation Identifiers</h2>
+<p>
+  The <code>correlationId</code> groups messages that belong to the same logical conversation
+  or workflow, regardless of the reply chain structure. This is particularly useful for
+  multi-step task workflows.
+</p>
+<ul>
+  <li>The initiator <span class="rfc-keyword">SHOULD</span> set <code>correlationId</code> to the <code>id</code> of the first message in the conversation.</li>
+  <li>All subsequent messages in the conversation <span class="rfc-keyword">SHOULD</span> carry the same <code>correlationId</code>.</li>
+  <li>Implementations <span class="rfc-keyword">MAY</span> use <code>correlationId</code> to reconstruct conversation history.</li>
+</ul>
+
+<h2 class="numbered">Task-Result Binding</h2>
+<p>
+  A <code>result</code> message is bound to its originating <code>task</code> by the <code>replyTo</code>
+  field. Implementations <span class="rfc-keyword">MUST</span> be able to correlate results to tasks.
+  If a task generates multiple partial results, each <span class="rfc-keyword">MUST</span> reference
+  the original task <code>id</code> in <code>replyTo</code> and share the same <code>correlationId</code>.
+</p>
+
+<!-- ============================================================ -->
+<!-- 7. TRANSPORT LAYER -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Transport Layer</h1>
+
+<h2 class="numbered">Transport Requirements</h2>
+<p>
+  Any LCP transport binding <span class="rfc-keyword">MUST</span> satisfy the following requirements:
+</p>
+<ol>
+  <li><strong>Encryption</strong>: All data in transit MUST be encrypted with at least 128-bit security.</li>
+  <li><strong>Authentication</strong>: The transport MUST authenticate both endpoints.</li>
+  <li><strong>Integrity</strong>: The transport MUST detect message tampering.</li>
+  <li><strong>Atomicity</strong>: Message delivery MUST be atomic — partial messages MUST NOT be delivered.</li>
+  <li><strong>Naming</strong>: The transport MUST preserve the original filename.</li>
+</ol>
+
+<h2 class="numbered">Taildrop Binding (Normative)</h2>
+<p>
+  The normative transport binding for LCP/1.0 uses <strong>Tailscale Taildrop</strong>, which
+  provides peer-to-peer file transfer over WireGuard tunnels.
+</p>
+
+<h3 class="numbered">File Naming Convention</h3>
+<p>
+  LCP message files <span class="rfc-keyword">MUST</span> follow this naming convention:
+</p>
+<pre><code>msg_{uuid-prefix-8}.json</code></pre>
+<p>
+  Where <code>{uuid-prefix-8}</code> is the first 8 characters of the message's UUID <code>id</code> field.
+</p>
+
+<div class="example">
+  Message with <code>id: "550e8400-e29b-41d4-a716-446655440000"</code> →
+  filename: <code>msg_550e8400.json</code>
+</div>
+
+<h3 class="numbered">Send Procedure</h3>
+<ol>
+  <li>Construct the LCP envelope as a JSON object.</li>
+  <li>Serialize to UTF-8 JSON with 2-space indentation.</li>
+  <li>Write to a temporary file: <code>/tmp/msg_{prefix}.json</code></li>
+  <li>Archive a copy to <code>{DATA_DIR}/outbox/msg_{prefix}.json</code></li>
+  <li>Execute: <code>tailscale --socket {SOCKET} file cp {tmpfile} {peer-tailscale-name}:</code></li>
+  <li>Remove the temporary file.</li>
+  <li>Verify the exit code. Non-zero indicates delivery failure.</li>
+</ol>
+
+<h3 class="numbered">Receive Procedure</h3>
+<ol>
+  <li>Execute: <code>tailscale --socket {SOCKET} file get {INBOX_DIR}/</code></li>
+  <li>List all files matching <code>msg_*.json</code> in the inbox directory.</li>
+  <li>For each file, in lexicographic order:
+    <ol type="a">
+      <li>Read with <code>utf-8-sig</code> encoding (handles Windows BOM).</li>
+      <li>Parse as JSON.</li>
+      <li>Validate envelope fields (Section 4).</li>
+      <li>Verify <code>from</code> is in the peer registry at Trust Level ≥ 1.</li>
+      <li>Check <code>type</code> against the sender's trust level (Section 3.3).</li>
+      <li>Dispatch to the application layer.</li>
+      <li>Move to <code>{DATA_DIR}/inbox_archive/</code>.</li>
+    </ol>
+  </li>
+</ol>
+
+<div class="warning">
+  The receive procedure MUST use <code>utf-8-sig</code> encoding to handle the UTF-8 BOM
+  (byte order mark, <code>0xEF 0xBB 0xBF</code>) that Windows implementations may prepend.
+  Failure to handle BOM will cause JSON parse errors.
+</div>
+
+<h3 class="numbered">Taildrop Specifics</h3>
+<table>
+  <tr><th>Parameter</th><th>Value</th></tr>
+  <tr><td>Socket path (macOS Homebrew)</td><td><code>/opt/homebrew/var/run/tailscale/tailscaled.sock</code></td></tr>
+  <tr><td>Socket path (Linux)</td><td><code>/var/run/tailscale/tailscaled.sock</code></td></tr>
+  <tr><td>Socket path (Windows)</td><td>Named pipe: <code>\\.\pipe\ProtectedPrefix\Administrators\Tailscale\tailscaled</code></td></tr>
+  <tr><td>Send timeout</td><td>30 seconds</td></tr>
+  <tr><td>Receive timeout</td><td>10 seconds</td></tr>
+  <tr><td>Encryption</td><td>WireGuard (Curve25519, ChaCha20-Poly1305, BLAKE2s)</td></tr>
+</table>
+
+<h2 class="numbered">HTTP Sync Binding (Informative)</h2>
+<p>
+  An alternative transport binding using HTTP REST APIs over Tailscale. This is defined
+  informatively for implementations that prefer continuous bidirectional synchronization.
+</p>
+<table>
+  <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+  <tr><td><code>/api/sync/push</code></td><td>POST</td><td>Push files to peer</td></tr>
+  <tr><td><code>/api/sync/pull</code></td><td>GET</td><td>Pull files from peer</td></tr>
+  <tr><td><code>/api/sync/status</code></td><td>GET</td><td>Check peer online status</td></tr>
+</table>
+<p>
+  HTTP Sync <span class="rfc-keyword">MUST</span> use shared-secret authentication (Bearer token)
+  and <span class="rfc-keyword">MUST</span> operate over the Tailscale network (ensuring WireGuard encryption).
+</p>
+
+<h2 class="numbered">Transport Negotiation</h2>
+<p>
+  LCP/1.0 does not define transport negotiation. If multiple transports are available,
+  implementations <span class="rfc-keyword">SHOULD</span> prefer Taildrop for reliability
+  and <span class="rfc-keyword">MAY</span> fall back to HTTP Sync if Taildrop is unavailable.
+</p>
+
+<!-- ============================================================ -->
+<!-- 8. LIFECYCLE & STATE MACHINE -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Lifecycle &amp; State Machine</h1>
+
+<h2 class="numbered">Connection States</h2>
+
+<div class="figure">
+<pre>
+                    ┌───────────┐
+                    │           │
+         ┌────────▶│  OFFLINE  │◀────────┐
+         │         │           │         │
+         │         └─────┬─────┘         │
+         │               │               │
+    peer leaves     peer joins       timeout
+    tailnet        tailnet          (72h)
+         │               │               │
+         │         ┌─────▼─────┐         │
+         │         │           │         │
+         │         │  ONLINE   │─────────┘
+         │         │           │
+         │         └─────┬─────┘
+         │               │
+         │          ping/pong
+         │          exchange
+         │               │
+         │         ┌─────▼─────┐
+         │         │           │
+         └─────────│  TRUSTED  │
+                   │           │
+                   └───────────┘
+</pre>
+<div class="figure-caption">Figure 4: Peer Connection State Machine</div>
+</div>
+
+<h2 class="numbered">Message Processing Pipeline</h2>
+
+<div class="figure">
+<pre>
+  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+  │ Transport│    │  Parse   │    │ Validate │    │  Trust   │    │ Dispatch │
+  │  Receive │───▶│  JSON    │───▶│ Envelope │───▶│  Check   │───▶│ to App   │
+  │          │    │          │    │          │    │          │    │          │
+  └──────────┘    └────┬─────┘    └────┬─────┘    └────┬─────┘    └────┬─────┘
+                       │               │               │               │
+                   parse error    invalid fields   untrusted        success
+                       │               │               │               │
+                       ▼               ▼               ▼               ▼
+                    ┌──────┐       ┌──────┐       ┌──────┐       ┌──────┐
+                    │ Log  │       │ Log  │       │ Drop │       │Archive│
+                    │ Warn │       │Error │       │ Warn │       │ Move  │
+                    └──────┘       └──────┘       └──────┘       └──────┘
+</pre>
+<div class="figure-caption">Figure 5: Message Processing Pipeline</div>
+</div>
+
+<h2 class="numbered">Inbox / Outbox Model</h2>
+<p>
+  Each Lobster maintains a local data directory with the following structure:
+</p>
+<pre><code>{SKILL_DIR}/
+├── data/
+│   ├── inbox/            # Incoming messages (pending processing)
+│   ├── inbox_archive/    # Processed incoming messages
+│   └── outbox/           # Copies of sent messages
+├── config/
+│   └── peers.json        # Peer registry
+└── scripts/
+    ├── send.py           # Send implementation
+    ├── recv.py           # Receive implementation
+    ├── check_and_notify.py  # Non-archiving inbox check
+    └── ack.py            # Manual archive trigger</code></pre>
+
+<h2 class="numbered">Archival</h2>
+<p>
+  LCP mandates a <strong>two-phase receive</strong> model:
+</p>
+<ol>
+  <li><strong>Check Phase</strong>: Fetch and read messages without archiving. This allows the
+  application layer to read and process messages without risk of data loss.</li>
+  <li><strong>Acknowledge Phase</strong>: After the application has fully processed and responded
+  to a message, it is moved to the archive directory.</li>
+</ol>
+<p>
+  This two-phase model prevents the "swallowed message" anti-pattern where messages are
+  archived before being processed, leading to lost messages if the processing step fails.
+</p>
+
+<div class="note">
+  Archival is a local operation. It does not send any network message. The <code>ack</code>
+  message type (Section 5.5) is a separate, optional protocol-level acknowledgment.
+</div>
+
+<!-- ============================================================ -->
+<!-- 9. RELIABILITY & DELIVERY -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Reliability &amp; Delivery Guarantees</h1>
+
+<h2 class="numbered">At-Least-Once Delivery</h2>
+<p>
+  LCP provides <strong>at-least-once</strong> delivery semantics. The transport layer
+  (Taildrop) guarantees that a successfully sent file will eventually arrive at the
+  recipient, but the same message <span class="rfc-keyword">MAY</span> be delivered
+  more than once in certain failure scenarios (e.g., sender crashes after Taildrop
+  succeeds but before recording success locally).
+</p>
+
+<h2 class="numbered">Idempotency</h2>
+<p>
+  Receivers <span class="rfc-keyword">MUST</span> implement idempotency based on the
+  message <code>id</code> field:
+</p>
+<ul>
+  <li>Maintain a set of recently processed message IDs (minimum: last 1000 IDs or last 24 hours).</li>
+  <li>If a received message's <code>id</code> matches a previously processed ID, discard it silently.</li>
+  <li>The deduplication window <span class="rfc-keyword">SHOULD</span> be at least as long as the default TTL (24 hours).</li>
+</ul>
+
+<h2 class="numbered">Ordering</h2>
+<p>
+  LCP does <strong>not</strong> guarantee message ordering. Messages <span class="rfc-keyword">MAY</span>
+  arrive out of order due to transport scheduling, retries, or network conditions. Applications
+  that require ordering <span class="rfc-keyword">MUST</span> use the <code>timestamp</code> field
+  to reconstruct chronological order and <span class="rfc-keyword">SHOULD</span> use
+  <code>correlationId</code> to group related messages.
+</p>
+
+<h2 class="numbered">Retry Semantics</h2>
+<p>
+  If the transport layer reports a delivery failure:
+</p>
+<ol>
+  <li>The sender <span class="rfc-keyword">SHOULD</span> retry with exponential backoff.</li>
+  <li>Initial retry delay: 5 seconds. Maximum delay: 5 minutes. Maximum retries: 10.</li>
+  <li>After exhausting retries, the sender <span class="rfc-keyword">MUST</span> log the failure and <span class="rfc-keyword">MAY</span> notify the Principal.</li>
+  <li>The sender <span class="rfc-keyword">MUST NOT</span> generate a new <code>id</code> for retried messages.</li>
+</ol>
+
+<!-- ============================================================ -->
+<!-- 10. ERROR HANDLING -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Error Handling</h1>
+
+<h2 class="numbered">Error Codes</h2>
+<table>
+  <tr><th>Code</th><th>Name</th><th>Description</th></tr>
+  <tr><td>E001</td><td>PARSE_ERROR</td><td>JSON parsing failed</td></tr>
+  <tr><td>E002</td><td>INVALID_ENVELOPE</td><td>Required field missing or malformed</td></tr>
+  <tr><td>E003</td><td>UNKNOWN_SENDER</td><td>Sender not in peer registry</td></tr>
+  <tr><td>E004</td><td>TRUST_VIOLATION</td><td>Message type not allowed at sender's trust level</td></tr>
+  <tr><td>E005</td><td>TTL_EXPIRED</td><td>Message exceeded its time-to-live</td></tr>
+  <tr><td>E006</td><td>DUPLICATE_ID</td><td>Message ID already processed (deduplication)</td></tr>
+  <tr><td>E007</td><td>SIZE_EXCEEDED</td><td>Envelope exceeds maximum size</td></tr>
+  <tr><td>E008</td><td>TASK_FAILED</td><td>Task could not be completed</td></tr>
+  <tr><td>E009</td><td>TASK_TIMEOUT</td><td>Task exceeded its deadline</td></tr>
+  <tr><td>E010</td><td>VERSION_MISMATCH</td><td>Unsupported protocol version</td></tr>
+  <tr><td>E011</td><td>TRANSPORT_ERROR</td><td>Transport-level failure</td></tr>
+  <tr><td>E099</td><td>INTERNAL_ERROR</td><td>Unspecified internal error</td></tr>
+</table>
+
+<h2 class="numbered">Error Message Format</h2>
+<pre><code>{
+  "lcp": "1.0",
+  "id": "...",
+  "from": "CloudJeffreyBOT",
+  "to": "JeffreyBOT",
+  "timestamp": "...",
+  "type": "error",
+  "message": "Task failed: unable to access the requested resource.",
+  "replyTo": "7344f936-...",
+  "extensions": {
+    "lcp-error": {
+      "code": "E008",
+      "name": "TASK_FAILED",
+      "detail": "HTTP 403 received when accessing stock price API.",
+      "retryable": false
+    }
+  }
+}</code></pre>
+
+<h2 class="numbered">Recovery Procedures</h2>
+<table>
+  <tr><th>Error</th><th>Sender Action</th><th>Receiver Action</th></tr>
+  <tr><td>E001, E002</td><td>Fix message format, resend</td><td>Log and discard</td></tr>
+  <tr><td>E003, E004</td><td>N/A (configuration issue)</td><td>Log and discard; notify principal</td></tr>
+  <tr><td>E005</td><td>Resend if still relevant</td><td>Discard expired message</td></tr>
+  <tr><td>E006</td><td>No action needed</td><td>Discard duplicate silently</td></tr>
+  <tr><td>E008, E009</td><td>Retry or reassign task</td><td>Send error report</td></tr>
+  <tr><td>E010</td><td>Negotiate version or upgrade</td><td>Send error report</td></tr>
+  <tr><td>E011</td><td>Retry with backoff</td><td>N/A</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 11. SECURITY CONSIDERATIONS -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Security Considerations</h1>
+
+<h2 class="numbered">Transport Security</h2>
+<p>
+  LCP <span class="rfc-keyword">REQUIRES</span> encrypted transport. The normative Taildrop
+  binding inherits WireGuard's security properties:
+</p>
+<ul>
+  <li><strong>Key Exchange</strong>: Curve25519 Diffie-Hellman</li>
+  <li><strong>Encryption</strong>: ChaCha20-Poly1305 (AEAD)</li>
+  <li><strong>Hashing</strong>: BLAKE2s</li>
+  <li><strong>Perfect Forward Secrecy</strong>: Yes (keys rotate every 2 minutes)</li>
+</ul>
+<p>
+  LCP messages <span class="rfc-keyword">MUST NOT</span> be transmitted over unencrypted channels.
+  Implementations <span class="rfc-keyword">MUST</span> verify that the transport provides at
+  least 128-bit security before sending messages.
+</p>
+
+<h2 class="numbered">Identity Verification</h2>
+<p>
+  Identity verification relies on the Tailscale control plane:
+</p>
+<ul>
+  <li>Each device on the Tailnet has a unique WireGuard public key bound to an authenticated identity.</li>
+  <li>Taildrop verifies the sender's identity at the Tailscale level before accepting file transfers.</li>
+  <li>LCP adds an application-level check: the <code>from</code> field <span class="rfc-keyword">MUST</span> match the expected LName for the Tailscale peer that delivered the file.</li>
+</ul>
+
+<div class="warning">
+  Implementations MUST validate that the <code>from</code> field matches the peer registry entry
+  for the delivering Tailscale node. Accepting a <code>from</code> field without cross-referencing
+  the transport-level identity enables identity spoofing attacks.
+</div>
+
+<h2 class="numbered">Message Integrity</h2>
+<p>
+  Message integrity is provided at two levels:
+</p>
+<ol>
+  <li><strong>Transport Level</strong>: WireGuard's Poly1305 MAC ensures that messages are not tampered with in transit.</li>
+  <li><strong>Application Level (OPTIONAL)</strong>: Implementations <span class="rfc-keyword">MAY</span> include a HMAC-SHA256 signature in <code>extensions["lcp-integrity"]</code> for defense-in-depth.</li>
+</ol>
+<pre><code>"extensions": {
+  "lcp-integrity": {
+    "algorithm": "HMAC-SHA256",
+    "signature": "base64-encoded-hmac",
+    "keyId": "shared-key-identifier"
+  }
+}</code></pre>
+
+<h2 class="numbered">Confidentiality</h2>
+<p>
+  LCP messages are stored as plaintext JSON on the local filesystem. This is by design
+  (auditability goal). Implementations <span class="rfc-keyword">SHOULD</span>:
+</p>
+<ul>
+  <li>Set file permissions to <code>0600</code> (owner read/write only) for inbox and outbox directories.</li>
+  <li>Use encrypted filesystems (FileVault, BitLocker, LUKS) for the data directory.</li>
+  <li>Consider application-level encryption for messages containing sensitive content, using the <code>lcp-encrypted</code> extension.</li>
+</ul>
+
+<h2 class="numbered">Replay Protection</h2>
+<p>
+  Replay attacks are mitigated by:
+</p>
+<ul>
+  <li><strong>UUID uniqueness</strong>: Each message has a unique ID; deduplication (Section 9.2) prevents replayed messages from being processed twice.</li>
+  <li><strong>TTL enforcement</strong>: Expired messages are discarded.</li>
+  <li><strong>Timestamp validation</strong>: Implementations <span class="rfc-keyword">SHOULD</span> reject messages with timestamps more than <code>ttl</code> seconds in the past.</li>
+</ul>
+
+<h2 class="numbered">Denial of Service</h2>
+<p>
+  Potential DoS vectors and mitigations:
+</p>
+<table>
+  <tr><th>Vector</th><th>Mitigation</th></tr>
+  <tr><td>Message flood</td><td>Rate limiting: max 100 messages per peer per hour</td></tr>
+  <tr><td>Large message</td><td>Size limit enforcement (1 MiB max)</td></tr>
+  <tr><td>Malformed JSON</td><td>Parse with size-limited reader; reject on first error</td></tr>
+  <tr><td>Disk exhaustion</td><td>Maximum inbox size: 100 MiB; oldest messages purged</td></tr>
+</table>
+
+<h2 class="numbered">Privacy</h2>
+<p>
+  LCP messages may contain private information from the Principal's environment. Implementations:
+</p>
+<ul>
+  <li><span class="rfc-keyword">MUST NOT</span> forward message contents to third parties without Principal consent.</li>
+  <li><span class="rfc-keyword">MUST NOT</span> log message contents to external services.</li>
+  <li><span class="rfc-keyword">SHOULD</span> implement configurable retention policies for archived messages.</li>
+  <li><span class="rfc-keyword">MUST</span> delete archived messages after a configurable retention period (default: 30 days).</li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- 12. ENCODING & INTEROPERABILITY -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Encoding &amp; Interoperability</h1>
+
+<h2 class="numbered">Character Encoding</h2>
+<ul>
+  <li>All LCP messages <span class="rfc-keyword">MUST</span> be encoded in UTF-8 (<a href="#ref-rfc3629">RFC 3629</a>).</li>
+  <li>Receivers <span class="rfc-keyword">MUST</span> accept UTF-8 with or without BOM.</li>
+  <li>Senders <span class="rfc-keyword">SHOULD NOT</span> include BOM.</li>
+  <li>JSON serialization <span class="rfc-keyword">MUST</span> use <code>ensure_ascii=False</code> (or equivalent) to preserve Unicode characters.</li>
+</ul>
+
+<h2 class="numbered">Timestamp Format</h2>
+<ul>
+  <li>Timestamps <span class="rfc-keyword">MUST</span> conform to <a href="#ref-rfc3339">RFC 3339</a> / ISO 8601.</li>
+  <li>Timestamps <span class="rfc-keyword">MUST</span> include timezone offset (e.g., <code>+08:00</code>, <code>Z</code>).</li>
+  <li>Sub-second precision <span class="rfc-keyword">SHOULD</span> be microsecond (6 digits).</li>
+  <li>Example: <code>2026-03-26T13:56:00.518245+08:00</code></li>
+</ul>
+
+<h2 class="numbered">UUID Format</h2>
+<ul>
+  <li>Message IDs <span class="rfc-keyword">MUST</span> be UUID version 4, lowercase, with hyphens (<a href="#ref-rfc9562">RFC 9562</a>).</li>
+  <li>Example: <code>550e8400-e29b-41d4-a716-446655440000</code></li>
+</ul>
+
+<h2 class="numbered">Cross-Platform Considerations</h2>
+<table>
+  <tr><th>Issue</th><th>Recommendation</th></tr>
+  <tr><td>Line endings</td><td>Use <code>\n</code> (LF). Accept <code>\r\n</code> (CRLF).</td></tr>
+  <tr><td>File paths</td><td>Use forward slash <code>/</code> in all path references.</td></tr>
+  <tr><td>BOM</td><td>Read with <code>utf-8-sig</code>; write without BOM.</td></tr>
+  <tr><td>JSON indentation</td><td>2 spaces (for human readability). Receivers MUST accept any valid JSON.</td></tr>
+  <tr><td>Filename case</td><td>Treat as case-sensitive. Use lowercase <code>msg_</code> prefix.</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 13. EXTENSIBILITY -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">Extensibility</h1>
+
+<h2 class="numbered">Extension Fields</h2>
+<p>
+  The <code>extensions</code> object provides a namespace-keyed mechanism for extending
+  the envelope without modifying the core schema:
+</p>
+<pre><code>"extensions": {
+  "lcp-task": { "deadline": "...", "category": "..." },
+  "lcp-integrity": { "algorithm": "...", "signature": "..." },
+  "x-myapp-metadata": { "version": "2.0", "source": "cron" }
+}</code></pre>
+
+<p>Rules:</p>
+<ul>
+  <li>Standard extensions use the <code>lcp-</code> prefix.</li>
+  <li>Custom extensions <span class="rfc-keyword">MUST</span> use the <code>x-</code> prefix.</li>
+  <li>Receivers <span class="rfc-keyword">MUST</span> ignore unknown extensions without error.</li>
+  <li>Extensions <span class="rfc-keyword">MUST NOT</span> duplicate or override core envelope fields.</li>
+</ul>
+
+<h3>Registered Standard Extensions</h3>
+<table>
+  <tr><th>Namespace</th><th>Purpose</th><th>Status</th></tr>
+  <tr><td><code>lcp-task</code></td><td>Task metadata (deadline, category, priority details)</td><td>Stable</td></tr>
+  <tr><td><code>lcp-result</code></td><td>Structured result data</td><td>Stable</td></tr>
+  <tr><td><code>lcp-error</code></td><td>Structured error details (code, name, retryable)</td><td>Stable</td></tr>
+  <tr><td><code>lcp-integrity</code></td><td>HMAC signature for defense-in-depth</td><td>Experimental</td></tr>
+  <tr><td><code>lcp-encrypted</code></td><td>Application-level payload encryption</td><td>Experimental</td></tr>
+  <tr><td><code>lcp-routing</code></td><td>Multi-hop routing metadata (LCP/2.0)</td><td>Draft</td></tr>
+</table>
+
+<h2 class="numbered">Custom Message Types</h2>
+<p>
+  Custom message types <span class="rfc-keyword">MUST</span> use the <code>x-</code> prefix:
+</p>
+<ul>
+  <li><code>x-heartbeat</code> — Periodic liveness check</li>
+  <li><code>x-file-transfer</code> — Large file transfer coordination</li>
+  <li><code>x-broadcast</code> — Multi-peer announcement (LCP/2.0 preview)</li>
+</ul>
+<p>
+  Receivers that do not understand a custom type <span class="rfc-keyword">MUST</span> log
+  a warning and <span class="rfc-keyword">MAY</span> respond with an <code>error</code>
+  (code E002) or silently discard the message.
+</p>
+
+<h2 class="numbered">Version Negotiation</h2>
+<p>
+  If a receiver receives a message with an unsupported <code>lcp</code> version:
+</p>
+<ol>
+  <li>It <span class="rfc-keyword">MUST</span> respond with an <code>error</code> message (code E010).</li>
+  <li>The error's <code>extensions["lcp-error"]</code> <span class="rfc-keyword">SHOULD</span> include a <code>supportedVersions</code> array.</li>
+  <li>The sender <span class="rfc-keyword">MAY</span> retry with a supported version.</li>
+</ol>
+
+<!-- ============================================================ -->
+<!-- 14. IANA-LIKE CONSIDERATIONS -->
+<!-- ============================================================ -->
+<h1 class="numbered">IANA-Like Considerations</h1>
+<p>
+  This specification defines the following registries, maintained by the Lobster Communication
+  Working Group:
+</p>
+<table>
+  <tr><th>Registry</th><th>Contents</th><th>Registration Policy</th></tr>
+  <tr><td>LCP Message Types</td><td>Core and extension message types</td><td>Standards Action (core), First Come First Served (x-)</td></tr>
+  <tr><td>LCP Error Codes</td><td>Error code numbers and names</td><td>Standards Action</td></tr>
+  <tr><td>LCP Extension Namespaces</td><td>Standard extension prefixes</td><td>Expert Review</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 15. REFERENCES -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h1 class="numbered">References</h1>
+
+<h2 class="numbered">Normative References</h2>
+<table class="references">
+  <tr><td id="ref-rfc2119">[RFC2119]</td><td>Bradner, S., "Key words for use in RFCs to Indicate Requirement Levels", BCP 14, RFC 2119, March 1997.</td></tr>
+  <tr><td id="ref-rfc3339">[RFC3339]</td><td>Klyne, G. and C. Newman, "Date and Time on the Internet: Timestamps", RFC 3339, July 2002.</td></tr>
+  <tr><td id="ref-rfc3629">[RFC3629]</td><td>Yergeau, F., "UTF-8, a transformation format of ISO 10646", STD 63, RFC 3629, November 2003.</td></tr>
+  <tr><td id="ref-rfc8174">[RFC8174]</td><td>Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words", BCP 14, RFC 8174, May 2017.</td></tr>
+  <tr><td id="ref-rfc8259">[RFC8259]</td><td>Bray, T., Ed., "The JavaScript Object Notation (JSON) Data Interchange Format", STD 90, RFC 8259, December 2017.</td></tr>
+  <tr><td id="ref-rfc9562">[RFC9562]</td><td>Davis, K., Peabody, B., and P. Leach, "Universally Unique IDentifiers (UUIDs)", RFC 9562, May 2024.</td></tr>
+</table>
+
+<h2 class="numbered">Informative References</h2>
+<table class="references">
+  <tr><td>[WIREGUARD]</td><td>Donenfeld, J.A., "WireGuard: Next Generation Kernel Network Tunnel", 2017. https://www.wireguard.com/papers/wireguard.pdf</td></tr>
+  <tr><td>[TAILSCALE]</td><td>Tailscale Inc., "How Tailscale Works", 2024. https://tailscale.com/blog/how-tailscale-works</td></tr>
+  <tr><td>[TAILDROP]</td><td>Tailscale Inc., "Taildrop", 2024. https://tailscale.com/kb/1106/taildrop</td></tr>
+  <tr><td>[NOISE]</td><td>Perrin, T., "The Noise Protocol Framework", Revision 34, 2018. https://noiseprotocol.org/noise.html</td></tr>
+  <tr><td>[JSONSCHEMA]</td><td>Wright, A. et al., "JSON Schema: A Media Type for Describing JSON Documents", Internet-Draft, 2022.</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- APPENDIX A: JSON SCHEMA -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<div class="appendix">
+<h1>A — Complete JSON Schema</h1>
+</div>
+
+<pre><code>{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lobster-comm.protocol/schemas/lcp-envelope-1.0.json",
+  "title": "LCP/1.0 Message Envelope",
+  "description": "Lobster Communication Protocol message envelope schema",
+  "type": "object",
+  "required": ["lcp", "id", "from", "to", "timestamp", "type", "message", "replyTo"],
+  "properties": {
+    "lcp": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Protocol version"
+    },
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique message identifier (UUID v4)"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+      "description": "Sender Lobster Name"
+    },
+    "to": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+      "description": "Recipient Lobster Name"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp with timezone"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["ping", "pong", "chat", "task", "result", "ack", "error"],
+      "description": "Message type (core types; x- prefixed types also valid)"
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 65536,
+      "description": "Human-readable message body"
+    },
+    "replyTo": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "UUID of the message being replied to"
+    },
+    "correlationId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Conversation thread identifier"
+    },
+    "ttl": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 604800,
+      "default": 86400,
+      "description": "Time-to-live in seconds"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "normal", "high", "urgent"],
+      "default": "normal"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": { "type": "object" },
+      "description": "Namespace-keyed extension data"
+    }
+  },
+  "additionalProperties": false
+}</code></pre>
+
+<!-- ============================================================ -->
+<!-- APPENDIX B: REFERENCE IMPLEMENTATION -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<div class="appendix">
+<h1>B — Reference Implementation</h1>
+</div>
+
+<p>
+  The following Python 3 code provides a minimal, spec-compliant LCP/1.0 implementation.
+  It requires only Python standard library modules.
+</p>
+
+<h3>B.1 Envelope Construction</h3>
+<pre><code>import json, uuid
+from datetime import datetime, timezone, timedelta
+
+def create_envelope(from_name, to_name, msg_type, message,
+                    reply_to=None, correlation_id=None,
+                    ttl=86400, priority="normal", extensions=None):
+    """Create a spec-compliant LCP/1.0 envelope."""
+    tz = timezone(timedelta(hours=8))  # Configurable
+    return {
+        "lcp": "1.0",
+        "id": str(uuid.uuid4()),
+        "from": from_name,
+        "to": to_name,
+        "timestamp": datetime.now(tz).isoformat(),
+        "type": msg_type,
+        "message": message,
+        "replyTo": reply_to,
+        "correlationId": correlation_id,
+        "ttl": ttl,
+        "priority": priority,
+        "extensions": extensions or {}
+    }</code></pre>
+
+<h3>B.2 Envelope Validation</h3>
+<pre><code>import re
+
+LNAME_RE = re.compile(r'^[A-Za-z][A-Za-z0-9_-]{0,63}$')
+UUID_RE = re.compile(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+)
+VALID_TYPES = {"ping","pong","chat","task","result","ack","error"}
+MAX_SIZE = 1_048_576  # 1 MiB
+
+def validate_envelope(raw_bytes):
+    """Validate an LCP envelope. Returns (envelope, errors)."""
+    errors = []
+    if len(raw_bytes) > MAX_SIZE:
+        return None, ["E007: Envelope exceeds 1 MiB"]
+    try:
+        env = json.loads(raw_bytes.decode('utf-8-sig'))
+    except (json.JSONDecodeError, UnicodeDecodeError) as e:
+        return None, [f"E001: Parse error: {e}"]
+
+    for field in ("lcp", "id", "from", "to", "timestamp", "type", "message"):
+        if field not in env:
+            errors.append(f"E002: Missing required field: {field}")
+    if errors:
+        return None, errors
+
+    if env["lcp"] != "1.0":
+        errors.append(f"E010: Unsupported version: {env['lcp']}")
+    if not UUID_RE.match(env.get("id", "")):
+        errors.append("E002: Invalid UUID format for 'id'")
+    if not LNAME_RE.match(env.get("from", "")):
+        errors.append("E002: Invalid LName for 'from'")
+    if not LNAME_RE.match(env.get("to", "")):
+        errors.append("E002: Invalid LName for 'to'")
+
+    msg_type = env.get("type", "")
+    if msg_type not in VALID_TYPES and not msg_type.startswith("x-"):
+        errors.append(f"E002: Unknown message type: {msg_type}")
+
+    return env, errors</code></pre>
+
+<h3>B.3 Transport: Taildrop Send</h3>
+<pre><code>import subprocess, tempfile, os
+
+def taildrop_send(envelope, peer_tailscale_name, socket_path, outbox_dir):
+    """Send an LCP envelope via Taildrop. Returns success boolean."""
+    fname = f"msg_{envelope['id'][:8]}.json"
+    payload = json.dumps(envelope, ensure_ascii=False, indent=2)
+
+    # Archive locally
+    os.makedirs(outbox_dir, exist_ok=True)
+    with open(os.path.join(outbox_dir, fname), 'w', encoding='utf-8') as f:
+        f.write(payload)
+
+    # Send via Taildrop
+    tmp = os.path.join(tempfile.gettempdir(), fname)
+    with open(tmp, 'w', encoding='utf-8') as f:
+        f.write(payload)
+    try:
+        result = subprocess.run(
+            ["tailscale", "--socket", socket_path,
+             "file", "cp", tmp, f"{peer_tailscale_name}:"],
+            capture_output=True, text=True, timeout=30
+        )
+        return result.returncode == 0
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)</code></pre>
+
+<!-- ============================================================ -->
+<!-- APPENDIX C: EXAMPLE MESSAGE FLOWS -->
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<div class="appendix">
+<h1>C — Example Message Flows</h1>
+</div>
+
+<h3>C.1 Handshake Flow</h3>
+<div class="figure">
+<pre>
+  JeffreyBOT                                    CloudJeffreyBOT
+     │                                                  │
+     │   ping: "Hello from the Mac side! 🦞"            │
+     ├─────────────────────────────────────────────────▶│
+     │                                                  │
+     │   pong: "Pong! Windows side ready. 🦞"           │
+     │◀─────────────────────────────────────────────────┤
+     │                                                  │
+     │   [Trust established: bidirectional]              │
+</pre>
+</div>
+
+<h3>C.2 Task Delegation Flow</h3>
+<div class="figure">
+<pre>
+  JeffreyBOT                                    CloudJeffreyBOT
+     │                                                  │
+     │   task: "Check AAPL stock price"                 │
+     │   correlationId: "τ"                             │
+     ├─────────────────────────────────────────────────▶│
+     │                                                  │
+     │   ack: "Task received, processing."              │
+     │   replyTo: task.id, correlationId: "τ"           │
+     │◀─────────────────────────────────────────────────┤
+     │                                                  │
+     │            ... (processing time) ...             │
+     │                                                  │
+     │   result: "AAPL: $247.50 (+1.2%)"               │
+     │   replyTo: task.id, correlationId: "τ"           │
+     │◀─────────────────────────────────────────────────┤
+</pre>
+</div>
+
+<h3>C.3 Error Recovery Flow</h3>
+<div class="figure">
+<pre>
+  JeffreyBOT                                    CloudJeffreyBOT
+     │                                                  │
+     │   task: "Access restricted database"             │
+     ├─────────────────────────────────────────────────▶│
+     │                                                  │
+     │   error: E008 TASK_FAILED                        │
+     │   "HTTP 403 - access denied"                     │
+     │   retryable: false                               │
+     │◀─────────────────────────────────────────────────┤
+     │                                                  │
+     │   [JeffreyBOT logs error, notifies Principal]    │
+</pre>
+</div>
+
+<h3>C.4 Conversation Thread Flow</h3>
+<div class="figure">
+<pre>
+  JeffreyBOT                                    CloudJeffreyBOT
+     │                                                  │
+     │   chat(A): "1+3=?" correlationId=A               │
+     ├─────────────────────────────────────────────────▶│
+     │                                                  │
+     │   chat(B): "4!" replyTo=A, correlationId=A       │
+     │◀─────────────────────────────────────────────────┤
+     │                                                  │
+     │   chat(C): "Correct ✅" replyTo=B, corr=A        │
+     ├─────────────────────────────────────────────────▶│
+</pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- APPENDIX D: CHANGE LOG -->
+<!-- ============================================================ -->
+<div class="appendix">
+<h1>D — Change Log</h1>
+</div>
+
+<table>
+  <tr><th>Version</th><th>Date</th><th>Changes</th></tr>
+  <tr>
+    <td>1.0.0</td><td>2026-03-26</td>
+    <td>Initial release. Core protocol specification based on the operational
+    Lobster-Comm system deployed between JeffreyBOT (macOS) and CloudJeffreyBOT (Windows).</td>
+  </tr>
+</table>
+
+<div class="doc-footer">
+  <p>
+    LCP-SPEC-2026-0001 &nbsp;|&nbsp; Lobster Communication Protocol 1.0 &nbsp;|&nbsp; March 2026<br>
+    🦞 End of Document 🦞
+  </p>
+</div>
+
+</body>
+</html>

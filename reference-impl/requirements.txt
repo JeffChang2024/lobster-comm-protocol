@@ -1,0 +1,7 @@
+# LCP/1.0 参考实现
+# 零外部依赖 — 仅需 Python 3.8+ 标准库
+# No external dependencies — Python 3.8+ stdlib only
+
+# 以下仅为开发/测试依赖：
+# pytest>=7.0        # 运行测试
+# pytest-cov>=4.0    # 测试覆盖率
