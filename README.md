@@ -134,12 +134,30 @@ for msg in messages:
   消息丢弃                        仅握手消息                       所有消息类型
 ```
 
+## 典型应用场景
+
+| 场景 | 说明 | 关键消息类型 |
+|------|------|-------------|
+| 🖥️ **跨设备协作** | Mac 智能体委托 Windows 智能体访问内网资源 | task → result |
+| 🏠 **智能家居联动** | 主智能体检测到"快到家"，委托树莓派开空调开灯 | task → result + x-heartbeat |
+| 📊 **分布式研究** | 多智能体并行采集中英文信息源，汇总生成报告 | task(并行) → result(异步) |
+| 🔧 **DevOps 自动化** | 开发机分析bug，服务器跑测试部署，全链路自动化 | task → ack → result |
+| 🔒 **安全巡检** | 中心智能体向多台设备并行发起扫描，汇总异常 | task → result/error |
+| 📞 **AI 电话中转** | Mac决策 → 手机打电话 → Windows更新记录 | task 链式传递 |
+| 🔍 **代码审查** | 安全/性能/风格智能体并行审查同一PR | task(并行) + correlationId |
+| 💾 **灾备协调** | 协调多机备份，hash校验，失败自动报警 | task → result + lcp-result |
+| 🧠 **知识共享** | 金融专家智能体 ↔ 技术专家智能体互相请教 | task ↔ result |
+| 📧 **工作流串联** | 邮件→摘要→日历→提醒，跨设备自动化流水线 | task 链式 |
+
+> 📖 [查看完整应用场景文档（含时序图）](docs/USE_CASES.md)
+
 ## 文档
 
 | 文档 | 说明 |
 |------|------|
 | [📖 完整规范（中文）](spec/LCP-1.0-spec-zh.md) | LCP/1.0 完整技术规范 |
 | [📖 Full Specification (EN)](spec/LCP-1.0-spec-en.md) | LCP/1.0 Full Technical Specification |
+| [🎯 典型应用场景](docs/USE_CASES.md) | 10 大应用场景详解 |
 | [📐 JSON Schema](schema/lcp-envelope-1.0.json) | 消息信封 JSON Schema |
 | [🔧 参考实现](reference-impl/) | Python 参考实现 |
 | [📋 示例消息](examples/) | 各类型消息示例 |
